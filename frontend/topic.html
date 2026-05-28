@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic — Plein les oreilles</title>
+  <link rel="stylesheet" href="static/css/global.css">
+  <link rel="stylesheet" href="static/css/topic.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="main_info">
+    <a href="index.html"><img class="logo" src="static/img/logo.png" alt="logo"></a>
+    <div class="title"><h1>Plein les oreilles</h1></div>
+  </div>
+  <div class="header-actions">
+    <div class="search-shell">
+      <input class="searchbox" id="searchInput" type="search" placeholder="De quoi on parle ?">
+    </div>
+    <div id="header-user-area"></div>
+  </div>
+</header>
+
+<!-- TOPIC PAGE -->
+<div class="topic-page">
+  <a class="back-link" href="index.html">← Retour aux topics</a>
+
+  <div id="topic-content">
+    <div class="empty-state"><div class="emoji">⏳</div><p>Chargement...</p></div>
+  </div>
+
+  <!-- REPLIES -->
+  <div class="replies-section" id="replies-section" style="display:none">
+    <div class="replies-header">
+      <h2 id="replies-count">Réponses</h2>
+      <div class="replies-toolbar">
+        <div class="sort-tabs">
+          <button class="sort-tab active" data-sort="chrono" onclick="setSortReplies('chrono', this)">Chronologique</button>
+          <button class="sort-tab" data-sort="likes" onclick="setSortReplies('likes', this)">Popularité</button>
+        </div>
+        <select class="per-page-select" id="replies-per-page" style="margin-left:8px">
+          <option value="10">10 / page</option>
+          <option value="20">20 / page</option>
+          <option value="30">30 / page</option>
+        </select>
+      </div>
+    </div>
+    <div id="replies-list"></div>
+    <div class="pagination" id="replies-pagination"></div>
+  </div>
+
+  <!-- REPLY FORM -->
+  <div class="reply-form-section" id="reply-form-section" style="display:none">
+    <h3>Poster une réponse</h3>
+    <div class="reply-form">
+      <div class="form-group">
+        <textarea class="form-textarea" id="reply-body" placeholder="Votre réponse..." style="min-height:110px"></textarea>
+      </div>
+      <div class="form-error" id="reply-error"></div>
+      <div>
+        <button class="btn btn-primary" onclick="submitReply()">Répondre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOT LOGGED IN PROMPT -->
+  <div id="login-prompt" style="display:none;text-align:center;padding:24px;background:#fff;border-radius:var(--radius);border:1.5px solid var(--accent)">
+    <p style="margin-bottom:12px;color:var(--text-muted)">Connectez-vous pour répondre à ce topic.</p>
+    <a class="btn btn-primary" href="connexion.html">Se connecter</a>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="confirm-delete-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2>Confirmer la suppression</h2>
+      <button class="modal-close" onclick="closeModal('confirm-delete-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-delete-text">Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirm-delete-modal')">Annuler</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TOPIC STATUS MODAL -->
+<div class="modal-overlay" id="edit-status-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h2>Modifier l'état</h2>
+      <button class="modal-close" onclick="closeModal('edit-status-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">État du topic</label>
+        <select class="form-select" id="edit-status-select">
+          <option value="open">Ouvert</option>
+          <option value="closed">Fermé</option>
+          <option value="archived">Archivé</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('edit-status-modal')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveStatus()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/db.js"></script>
+<script src="js/topic.js"></script>
+</body>
+</html>

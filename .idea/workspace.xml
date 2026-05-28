@@ -4,14 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e6fe8e2b-a0d2-46c4-bd66-56aa63e76d1e" name="Changes" comment="" />
+    <list default="true" id="e6fe8e2b-a0d2-46c4-bd66-56aa63e76d1e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/static/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/static/css/index.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="6" />
+    <option name="cachedIndexableFilesCount" value="15" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -31,61 +36,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000984670116237" />
-      <entry key="MS500" value="1.1580053240808397" />
-      <entry key="S2" value="1.6784354483917967" />
-      <entry key="S5" value="2.2162534427011837" />
-      <entry key="S10" value="3.0571541931889317" />
-      <entry key="S30" value="5.766235585612925" />
-      <entry key="S60" value="8.046779081541139" />
-      <entry key="M2" value="10.316692896582792" />
-      <entry key="M5" value="13.158033146874596" />
-      <entry key="M10" value="22.82462082536226" />
-      <entry key="M15" value="40.73771333485692" />
-      <entry key="M30" value="102.40809539614251" />
-      <entry key="H1" value="186.63006021281353" />
-      <entry key="H2" value="261.47454476149073" />
-      <entry key="H4" value="312.51273701432854" />
-      <entry key="D1" value="364.4171958376861" />
-      <entry key="W1" value="374.3187489722192" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0000000045610749" />
+      <entry key="M5" value="1.0014814460860104" />
+      <entry key="M10" value="1.1019742832263129" />
+      <entry key="M15" value="1.4239628119352206" />
+      <entry key="M30" value="3.0389407708634066" />
+      <entry key="H1" value="6.756824056809961" />
+      <entry key="H2" value="11.984360213856526" />
+      <entry key="H4" value="16.718864257757208" />
+      <entry key="D1" value="55.96676846164899" />
+      <entry key="W1" value="436.2074860478675" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="2.282660156839043E-296" />
-      <entry key="MS500" value="7.441975769883527E-60" />
-      <entry key="S2" value="1.6516653691190448E-15" />
-      <entry key="S5" value="1.2222747079498216E-6" />
-      <entry key="S10" value="0.0011055670251817658" />
-      <entry key="S30" value="0.10459320347773295" />
-      <entry key="S60" value="0.3560780969146333" />
-      <entry key="M2" value="0.7528553441570061" />
-      <entry key="M5" value="1.3217816946761343" />
-      <entry key="M10" value="1.90060649607159" />
-      <entry key="M15" value="2.639378343903657" />
-      <entry key="M30" value="5.1101860420903025" />
-      <entry key="H1" value="8.501096504491711" />
-      <entry key="H2" value="11.492439912720934" />
-      <entry key="H4" value="13.512305360917304" />
-      <entry key="D1" value="15.548214835301872" />
-      <entry key="W1" value="15.934480542307012" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="2.5977340692422386E-181" />
+      <entry key="M15" value="8.452532651724655E-121" />
+      <entry key="M30" value="3.5424971320862325E-60" />
+      <entry key="H1" value="8.85767422111261E-30" />
+      <entry key="H2" value="1.5222237139671088E-14" />
+      <entry key="H4" value="6.470832753515405E-7" />
+      <entry key="D1" value="1.4925018465983535" />
+      <entry key="W1" value="18.41843782075507" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0033789155725794822" />
-      <entry key="MS500" value="0.39151330195502043" />
-      <entry key="S2" value="1.3009596998507946" />
-      <entry key="S5" value="1.9936385760811854" />
-      <entry key="S10" value="2.899998889384867" />
-      <entry key="S30" value="5.7714968425575455" />
-      <entry key="S60" value="8.331424288905392" />
-      <entry key="M2" value="11.022223682532035" />
-      <entry key="M5" value="14.455492032336164" />
-      <entry key="M10" value="24.70713989933581" />
-      <entry key="M15" value="43.35770147924138" />
-      <entry key="M30" value="107.49569701279167" />
-      <entry key="H1" value="195.11124989340678" />
-      <entry key="H2" value="272.9533378647588" />
-      <entry key="H4" value="326.01699335922444" />
-      <entry key="D1" value="379.96386563885073" />
-      <entry key="W1" value="390.25300331285166" />
+      <entry key="MS100" value="0.17800627444963396" />
+      <entry key="MS500" value="0.7080877191072719" />
+      <entry key="S2" value="0.9173219076667583" />
+      <entry key="S5" value="0.9660702454156138" />
+      <entry key="S10" value="0.982888724838989" />
+      <entry key="S30" value="0.9942633959144827" />
+      <entry key="S60" value="0.9971275725374776" />
+      <entry key="M2" value="0.9985627579906421" />
+      <entry key="M5" value="1.0009062578234047" />
+      <entry key="M10" value="1.101685237554149" />
+      <entry key="M15" value="1.4237670794007733" />
+      <entry key="M30" value="3.0388349848583536" />
+      <entry key="H1" value="6.756761363846736" />
+      <entry key="H2" value="11.984321697642672" />
+      <entry key="H4" value="16.718842346893187" />
+      <entry key="D1" value="57.45911988145527" />
+      <entry key="W1" value="454.6256658154343" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -97,28 +102,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "javascript.preferred.runtime.type.id": "node",
-    "last_opened_file_path": "/Users/alexandreklotz/Documents/KLOTZ Alexandre/professionnel/N1/Forum/livrables_forum_teamXXL",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/alexandreklotz/Documents/KLOTZ Alexandre/professionnel/N1/Forum/livrables_forum_teamXXL&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/frontend/static/img" />
@@ -142,7 +147,8 @@
       <option name="presentableId" value="Default" />
       <updated>1772187863437</updated>
       <workItem from="1777291676058" duration="1032000" />
-      <workItem from="1779435916116" duration="6336000" />
+      <workItem from="1779435916116" duration="10407000" />
+      <workItem from="1779951096895" duration="5884000" />
     </task>
     <servers />
   </component>

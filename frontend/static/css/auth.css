@@ -1,0 +1,86 @@
+/* ── AUTH PAGE ───────────────────────────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.auth-card {
+  background: #fff;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px var(--shadow);
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 36px 28px;
+}
+
+.auth-logo-row {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 28px;
+}
+.auth-logo { width: 72px; height: auto; margin-bottom: 10px; }
+.auth-site-name {
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+  color: var(--accent-strong);
+}
+
+.auth-tabs {
+  display: flex;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--accent);
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+.auth-tab.active { background: var(--accent-strong); color: #fff; }
+
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+.auth-submit {
+  margin-top: 4px;
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.auth-submit:hover { background: var(--accent-dark); }
+
+.auth-footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.auth-back {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  transition: var(--transition);
+}
+.auth-back:hover { color: var(--accent-strong); }

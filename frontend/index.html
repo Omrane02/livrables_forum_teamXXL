@@ -1,220 +1,238 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plein les oreilles</title>
-    <!-- Main colors
-    #C72C48
-    #ec9da0
-    #fdebeb
-    #4c0a16
-    #020000
-    -->
-    <link rel="stylesheet" href="static/css/index.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plein les oreilles</title>
+  <link rel="stylesheet" href="static/css/global.css">
+  <link rel="stylesheet" href="static/css/index.css">
+</head>
 <body>
-    <header class="header">
-        <div class="main_info">
-            <div>
-                <img class="logo" src="static/img/logo.png" alt="logo">
-            </div>
-            <div class="title">
-                <h1>Plein les oreilles</h1>
-            </div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="main_info">
+    <a href="index.html"><img class="logo" src="static/img/logo.png" alt="logo"></a>
+    <div class="title"><h1>Plein les oreilles</h1></div>
+  </div>
+  <div class="header-actions">
+    <div class="search-shell">
+      <input class="searchbox" id="searchInput" type="search" placeholder="De quoi on parle ?">
+    </div>
+    <div id="header-user-area"></div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="accueil">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="categorie-sidebar">
+    <p class="sidebar-section-title">Genres</p>
+    <nav class="categories" id="categories-nav">
+      <a class="categorie active" href="#" data-category="all">Tous</a>
+
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Hip-hop">Hip-Hop ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Kendrick Lamar">Kendrick Lamar</a>
+          <a href="#" data-artist="Drake">Drake</a>
+          <a href="#" data-artist="Kanye West">Kanye West</a>
+          <a href="#" data-artist="Jay-Z">Jay-Z</a>
+          <a href="#" data-artist="Eminem">Eminem</a>
+          <a href="#" data-artist="Travis Scott">Travis Scott</a>
+          <a href="#" data-artist="J. Cole">J. Cole</a>
+          <a href="#" data-artist="Cardi B">Cardi B</a>
+          <a href="#" data-artist="Nicki Minaj">Nicki Minaj</a>
+          <a href="#" data-artist="21 Savage">21 Savage</a>
         </div>
+      </div>
 
-        <div class="header-actions">
-            <div class="search-shell">
-                <input class="searchbox" id="searchInput" type="search" placeholder="De quoi on parle ?">
-            </div>
-
-            <div>
-                <a class="icon-button" href="connexion.htnl" aria-label="Connexion">
-                    <img class="icon" src="static/img/search.svg" alt="Connexion">
-                </a>
-            </div>
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="R&B">R&B ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="The Weeknd">The Weeknd</a>
+          <a href="#" data-artist="Frank Ocean">Frank Ocean</a>
+          <a href="#" data-artist="Beyoncé">Beyoncé</a>
+          <a href="#" data-artist="Rihanna">Rihanna</a>
+          <a href="#" data-artist="Marvin Gaye">Marvin Gaye</a>
+          <a href="#" data-artist="Stevie Wonder">Stevie Wonder</a>
         </div>
-    </header>
+      </div>
 
-<!-- HERO -->
-    <section>
-        <div class="accueil">
-            <div class="categorie-sidebar">
-                <div class="categorie-summary">
-                    <span class="categorie-label">Categorie</span>
-                    <strong id="activeCategorie">Tout les types de zic</strong>
-                </div>
-                <nav class="categories">
-
-                    <!-- Tous -->
-                    <a class="categorie active" href="#" data-category="all">Tous</a>
-
-                    <!-- HIP-HOP -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Hip-hop">Hip-Hop ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Kendrick Lamar">Kendrick Lamar</a>
-                            <a href="#" data-artist="Drake">Drake</a>
-                            <a href="#" data-artist="Kanye West">Kanye West</a>
-                            <a href="#" data-artist="Jay-Z">Jay-Z</a>
-                            <a href="#" data-artist="Eminem">Eminem</a>
-                            <a href="#" data-artist="Travis Scott">Travis Scott</a>
-                            <a href="#" data-artist="J. Cole">J. Cole</a>
-                            <a href="#" data-artist="Cardi B">Cardi B</a>
-                            <a href="#" data-artist="Nicki Minaj">Nicki Minaj</a>
-                            <a href="#" data-artist="21 Savage">21 Savage</a>
-                        </div>
-                    </div>
-
-                    <!-- R&B -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="R&B">R&B ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="The Weeknd">The Weeknd</a>
-                            <a href="#" data-artist="Frank Ocean">Frank Ocean</a>
-                            <a href="#" data-artist="Beyoncé">Beyoncé</a>
-                            <a href="#" data-artist="Rihanna">Rihanna</a>
-                            <a href="#" data-artist="Marvin Gaye">Marvin Gaye</a>
-                            <a href="#" data-artist="Stevie Wonder">Stevie Wonder</a>
-                        </div>
-                    </div>
-
-                    <!-- POP -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Pop">Pop ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Beyoncé">Beyoncé</a>
-                            <a href="#" data-artist="Rihanna">Rihanna</a>
-                            <a href="#" data-artist="Bruno Mars">Bruno Mars</a>
-                            <a href="#" data-artist="Michael Jackson">Michael Jackson</a>
-                            <a href="#" data-artist="Whitney Houston">Whitney Houston</a>
-                        </div>
-                    </div>
-
-                    <!-- ROCK -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Rock">Rock ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="David Bowie">David Bowie</a>
-                            <a href="#" data-artist="Led Zeppelin">Led Zeppelin</a>
-                            <a href="#" data-artist="Pink Floyd">Pink Floyd</a>
-                            <a href="#" data-artist="The Beatles">The Beatles</a>
-                            <a href="#" data-artist="The Rolling Stones">The Rolling Stones</a>
-                            <a href="#" data-artist="Queen">Queen</a>
-                            <a href="#" data-artist="Nirvana">Nirvana</a>
-                            <a href="#" data-artist="Jimi Hendrix">Jimi Hendrix</a>
-                            <a href="#" data-artist="Eric Clapton">Eric Clapton</a>
-                        </div>
-                    </div>
-
-                    <!-- JAZZ -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Jazz">Jazz ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Miles Davis">Miles Davis</a>
-                            <a href="#" data-artist="John Coltrane">John Coltrane</a>
-                            <a href="#" data-artist="Louis Armstrong">Louis Armstrong</a>
-                            <a href="#" data-artist="Billie Holiday">Billie Holiday</a>
-                            <a href="#" data-artist="Ella Fitzgerald">Ella Fitzgerald</a>
-                            <a href="#" data-artist="Thelonious Monk">Thelonious Monk</a>
-                            <a href="#" data-artist="Herbie Hancock">Herbie Hancock</a>
-                        </div>
-                    </div>
-
-                    <!-- ELECTRONIC -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Electronic">Électro ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Daft Punk">Daft Punk</a>
-                            <a href="#" data-artist="Aphex Twin">Aphex Twin</a>
-                            <a href="#" data-artist="The Chemical Brothers">The Chemical Brothers</a>
-                            <a href="#" data-artist="Kraftwerk">Kraftwerk</a>
-                            <a href="#" data-artist="Calvin Harris">Calvin Harris</a>
-                        </div>
-                    </div>
-
-                    <!-- REGGAE -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Reggae">Reggae ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Bob Marley">Bob Marley</a>
-                            <a href="#" data-artist="Damian Marley">Damian Marley</a>
-                            <a href="#" data-artist="Lauryn Hill">Lauryn Hill</a>
-                        </div>
-                    </div>
-
-                    <!-- CLASSICAL -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Classical">Classique ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Beethoven">Beethoven</a>
-                            <a href="#" data-artist="Mozart">Mozart</a>
-                            <a href="#" data-artist="Bach">Bach</a>
-                        </div>
-                    </div>
-
-                    <!-- AUTRES -->
-                    <div class="dropdown">
-                        <a class="categorie" href="#" data-category="Indie">Indé ▾</a>
-                        <div class="submenu">
-                            <a href="#" data-artist="Radiohead">Radiohead</a>
-                            <a href="#" data-artist="Arctic Monkeys">Arctic Monkeys</a>
-                            <a href="#" data-artist="The Strokes">The Strokes</a>
-                        </div>
-                    </div>
-
-                </nav>
-            </div>
-
-            <div class="last-posts">
-                <div class="last-post-title">
-                    <h2>Posts</h2>
-                    <select name="last-post" id="last-post">
-                        <option value="recent">Recent</option>
-                        <option value="ancien">Ancien</option>
-                        <option value="like">Like</option>
-                        <option value="dislike">dislike</option>
-                    </select>
-                </div>
-                <div class="posts">
-                    <div class="post">
-                        <div class="post-main-info">
-                            <h3>Titre du post</h3>
-                            <p>Nom d'utilisateur</p>
-                            <p>Categorie</p>
-                        </div>
-                        <div class="post-txt">
-                            <p>Salut à tous,
-
-                                Je débute sur ce projet et j’essaie de mieux comprendre comment structurer une interface propre et intuitive. J’ai déjà mis en place quelques éléments (menu, filtres, affichage des catégories), mais je rencontre encore des problèmes de disposition, surtout avec les menus déroulants qui se chevauchent.
-
-                                Si quelqu’un a des conseils ou des bonnes pratiques pour gérer ce genre de layout en CSS (flex, positionnement des dropdowns, etc.), je suis preneur.
-
-                                Merci d’avance pour votre aide 👍</p>
-                        </div>
-
-                    </div>
-                    <div class="post"></div>
-                    <div class="post"></div>
-                    <div class="post"></div>
-                    <div class="post"></div>
-                </div>
-                <h2>Posts recents</h2>
-                <div class="posts">
-                    <div class="post"></div>
-                    <div class="post"></div>
-                    <div class="post"></div>
-                    <div class="post"></div>
-                    <div class="post"></div>
-                </div>
-
-            </div>
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Pop">Pop ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Beyoncé">Beyoncé</a>
+          <a href="#" data-artist="Rihanna">Rihanna</a>
+          <a href="#" data-artist="Bruno Mars">Bruno Mars</a>
+          <a href="#" data-artist="Michael Jackson">Michael Jackson</a>
+          <a href="#" data-artist="Whitney Houston">Whitney Houston</a>
         </div>
+      </div>
 
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Rock">Rock ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="David Bowie">David Bowie</a>
+          <a href="#" data-artist="Led Zeppelin">Led Zeppelin</a>
+          <a href="#" data-artist="Pink Floyd">Pink Floyd</a>
+          <a href="#" data-artist="The Beatles">The Beatles</a>
+          <a href="#" data-artist="The Rolling Stones">The Rolling Stones</a>
+          <a href="#" data-artist="Queen">Queen</a>
+          <a href="#" data-artist="Nirvana">Nirvana</a>
+          <a href="#" data-artist="Jimi Hendrix">Jimi Hendrix</a>
+          <a href="#" data-artist="Eric Clapton">Eric Clapton</a>
+        </div>
+      </div>
 
-    </section>
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Jazz">Jazz ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Miles Davis">Miles Davis</a>
+          <a href="#" data-artist="John Coltrane">John Coltrane</a>
+          <a href="#" data-artist="Louis Armstrong">Louis Armstrong</a>
+          <a href="#" data-artist="Billie Holiday">Billie Holiday</a>
+          <a href="#" data-artist="Ella Fitzgerald">Ella Fitzgerald</a>
+          <a href="#" data-artist="Thelonious Monk">Thelonious Monk</a>
+          <a href="#" data-artist="Herbie Hancock">Herbie Hancock</a>
+        </div>
+      </div>
 
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Electronic">Électro ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Daft Punk">Daft Punk</a>
+          <a href="#" data-artist="Aphex Twin">Aphex Twin</a>
+          <a href="#" data-artist="The Chemical Brothers">The Chemical Brothers</a>
+          <a href="#" data-artist="Kraftwerk">Kraftwerk</a>
+          <a href="#" data-artist="Calvin Harris">Calvin Harris</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Reggae">Reggae ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Bob Marley">Bob Marley</a>
+          <a href="#" data-artist="Damian Marley">Damian Marley</a>
+          <a href="#" data-artist="Lauryn Hill">Lauryn Hill</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Classical">Classique ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Beethoven">Beethoven</a>
+          <a href="#" data-artist="Mozart">Mozart</a>
+          <a href="#" data-artist="Bach">Bach</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <a class="categorie" href="#" data-category="Indie">Indé ▾</a>
+        <div class="submenu">
+          <a href="#" data-artist="Radiohead">Radiohead</a>
+          <a href="#" data-artist="Arctic Monkeys">Arctic Monkeys</a>
+          <a href="#" data-artist="The Strokes">The Strokes</a>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="content-header">
+      <h2 class="content-title" id="content-title">Tous les topics</h2>
+      <div class="toolbar">
+        <select class="sort-select" id="sort-select">
+          <option value="recent">Plus récents</option>
+          <option value="ancien">Plus anciens</option>
+          <option value="popular">Popularité</option>
+          <option value="like">Likes</option>
+        </select>
+        <select class="per-page-select" id="per-page-select">
+          <option value="10">10 / page</option>
+          <option value="20">20 / page</option>
+          <option value="30">30 / page</option>
+        </select>
+        <button class="btn btn-primary" id="new-topic-btn" onclick="openNewTopicModal()" style="display:none">
+          ✏️ Nouveau post
+        </button>
+      </div>
+    </div>
+
+    <!-- Tag filters -->
+    <div class="tag-filter-bar" id="tag-filter-bar"></div>
+
+    <!-- Active filters info -->
+    <div class="active-filters" id="active-filters"></div>
+
+    <!-- Topics list -->
+    <div id="topics-list"></div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="right-sidebar">
+    <h3>🔥 Populaires</h3>
+    <div id="popular-topics"></div>
+  </aside>
+</div>
+
+<!-- NEW TOPIC MODAL -->
+<div class="modal-overlay" id="new-topic-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Créer un nouveau post</h2>
+      <button class="modal-close" onclick="closeModal('new-topic-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Titre *</label>
+        <input class="form-input" id="nt-title" type="text" placeholder="Un titre accrocheur...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Corps *</label>
+        <textarea class="form-textarea" id="nt-body" placeholder="De quoi tu veux parler ?" style="min-height:130px"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catégorie principale *</label>
+        <select class="form-select" id="nt-category">
+          <option value="">-- Choisir --</option>
+          <option>Hip-hop</option><option>R&B</option><option>Pop</option>
+          <option>Rock</option><option>Jazz</option><option>Electronic</option>
+          <option>Reggae</option><option>Classical</option><option>Indie</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <div class="tags-input-area" id="tags-input-area" onclick="document.getElementById('tag-text-input').focus()">
+          <input id="tag-text-input" type="text" placeholder="Ajouter un tag...">
+        </div>
+        <div class="tag-suggestions" id="tag-suggestions"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">État</label>
+        <select class="form-select" id="nt-status">
+          <option value="open">Ouvert</option>
+          <option value="closed">Fermé</option>
+          <option value="archived">Archivé</option>
+        </select>
+      </div>
+      <div class="form-error" id="nt-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('new-topic-modal')">Annuler</button>
+      <button class="btn btn-primary" onclick="submitNewTopic()">Publier</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/db.js"></script>
 <script src="js/index.js"></script>
-
 </body>
 </html>

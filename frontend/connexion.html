@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Plein les oreilles</title>
+  <link rel="stylesheet" href="static/css/global.css">
+  <link rel="stylesheet" href="static/css/auth.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <a class="auth-back" href="index.html">← Retour à l'accueil</a>
+
+    <div class="auth-logo-row">
+      <img class="auth-logo" src="static/img/logo.png" alt="logo">
+      <span class="auth-site-name">Plein les oreilles</span>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Inscription</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="auth-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="login-email" type="email" placeholder="votre@email.fr" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-error" id="login-error"></div>
+        <button class="auth-submit" onclick="doLogin()">Se connecter</button>
+      </div>
+      <p class="auth-footer">Pas encore de compte ? <a href="#" onclick="switchTab('register')" style="color:var(--accent-strong);font-weight:600;">S'inscrire</a></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none">
+      <div class="auth-form">
+        <div class="form-group">
+          <label class="form-label">Pseudo</label>
+          <input class="form-input" id="reg-username" type="text" placeholder="MonPseudo42" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="reg-email" type="email" placeholder="votre@email.fr" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <input class="form-input" id="reg-password" type="password" placeholder="8 caractères minimum" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmer le mot de passe</label>
+          <input class="form-input" id="reg-password2" type="password" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <div class="form-error" id="reg-error"></div>
+        <button class="auth-submit" onclick="doRegister()">Créer mon compte</button>
+      </div>
+      <p class="auth-footer">Déjà un compte ? <a href="#" onclick="switchTab('login')" style="color:var(--accent-strong);font-weight:600;">Se connecter</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Plein les oreilles</title>
+  <link rel="stylesheet" href="static/css/global.css">
+  <link rel="stylesheet" href="static/css/admin.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="main_info">
+    <a href="index.html"><img class="logo" src="static/img/logo.png" alt="logo"></a>
+    <div class="title"><h1>Plein les oreilles</h1></div>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="index.html" style="color:#fff;border-color:rgba(255,255,255,0.5)">← Accueil</a>
+    <button class="btn btn-outline" onclick="doLogout()" style="color:#fff;border-color:rgba(255,255,255,0.5)">Déconnexion</button>
+  </div>
+</header>
+
+<div class="admin-page">
+  <h1 class="admin-title">🛠 Panneau d'administration</h1>
+  <p class="admin-subtitle">Gérez les topics, messages et utilisateurs.</p>
+
+  <!-- STATS -->
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="showTab('topics', this)">Topics</button>
+    <button class="admin-tab" onclick="showTab('replies', this)">Messages</button>
+    <button class="admin-tab" onclick="showTab('users', this)">Utilisateurs</button>
+  </div>
+
+  <!-- TOPICS TAB -->
+  <div id="tab-topics">
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Auteur</th>
+            <th>Catégorie</th>
+            <th>État</th>
+            <th>Likes</th>
+            <th>Réponses</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="topics-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REPLIES TAB -->
+  <div id="tab-replies" style="display:none">
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Topic</th>
+            <th>Auteur</th>
+            <th>Extrait</th>
+            <th>Likes</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="replies-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div id="tab-users" style="display:none">
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pseudo</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Inscription</th>
+            <th>Topics</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT STATUS MODAL -->
+<div class="modal-overlay" id="edit-status-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h2>Modifier l'état du topic</h2>
+      <button class="modal-close" onclick="closeModal('edit-status-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">État</label>
+        <select class="form-select" id="admin-status-select">
+          <option value="open">Ouvert</option>
+          <option value="closed">Fermé</option>
+          <option value="archived">Archivé</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('edit-status-modal')">Annuler</button>
+      <button class="btn btn-primary" id="save-status-btn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="modal-overlay" id="confirm-delete-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2>Confirmer la suppression</h2>
+      <button class="modal-close" onclick="closeModal('confirm-delete-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-delete-text">Êtes-vous sûr ?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirm-delete-modal')">Annuler</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/db.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
