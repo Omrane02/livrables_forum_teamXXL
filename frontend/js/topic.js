@@ -1,27 +1,31 @@
-// ─── STATE ───────────────────────────────────────────────────────────────────
-const session = DB.getSession();
-const params = new URLSearchParams(window.location.search);
-const topicId = params.get('id');
-let topic = null;
-let sortReplies = 'chrono';
-let repliesPage = 1;
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const session      = Session.get();
+const params       = new URLSearchParams(window.location.search);
+const topicId      = params.get('id');
+let topic          = null;
+let sortReplies    = 'date';
+let repliesPage    = 1;
 let repliesPerPage = 10;
-let pendingDeleteFn = null;
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-renderHeaderUser();
-if (!topicId) {
-  document.getElementById('topic-content').innerHTML = `<div class="empty-state"><div class="emoji">❌</div><p>Topic introuvable.</p></div>`;
-} else {
-  topic = DB.findTopic(topicId);
-  if (!topic) {
-    document.getElementById('topic-content').innerHTML = `<div class="empty-state"><div class="emoji">❌</div><p>Ce topic n'existe plus.</p></div>`;
-  } else {
-    renderTopic();
-    renderReplies();
-    setupReplyForm();
+(async () => {
+  renderHeaderUser();
+
+  if (!topicId) {
+    document.getElementById('topic-content').innerHTML = `<div class="empty-state"><div class="emoji">❌</div><p>Topic introuvable.</p></div>`;
+    return;
   }
-}
+
+  try {
+    const data = await Topics.getById(topicId);
+    topic = data.data;
+    renderTopic();
+    await renderReplies();
+    setupReplyForm();
+  } catch (e) {
+    document.getElementById('topic-content').innerHTML = `<div class="empty-state"><div class="emoji">❌</div><p>${e.message || 'Ce topic n\'existe plus.'}</p></div>`;
+  }
+})();
 
 // search redirect
 document.getElementById('searchInput').addEventListener('keydown', e => {
@@ -31,10 +35,10 @@ document.getElementById('searchInput').addEventListener('keydown', e => {
 });
 
 // replies per page
-document.getElementById('replies-per-page').addEventListener('change', e => {
+document.getElementById('replies-per-page').addEventListener('change', async e => {
   repliesPerPage = parseInt(e.target.value);
-  repliesPage = 1;
-  renderReplies();
+  repliesPage    = 1;
+  await renderReplies();
 });
 
 // ─── HEADER ───────────────────────────────────────────────────────────────────
@@ -45,7 +49,7 @@ function renderHeaderUser() {
     return;
   }
   const initials = session.username.slice(0, 2).toUpperCase();
-  const isAdmin = session.role === 'admin';
+  const isAdmin  = session.role === 'admin';
   area.innerHTML = `
     <div class="user-chip" id="user-chip">
       <div class="avatar">${initials}</div>
@@ -59,19 +63,14 @@ function renderHeaderUser() {
   document.getElementById('user-chip').addEventListener('click', e => e.currentTarget.classList.toggle('open'));
 }
 
-function doLogout() { DB.clearSession(); window.location.href = 'index.html'; }
+function doLogout() { Auth.logout(); }
 
 // ─── TOPIC ────────────────────────────────────────────────────────────────────
 function renderTopic() {
-  topic = DB.findTopic(topicId); // refresh
-  const author = DB.findUser(topic.authorId);
-  const authorName = author ? (author.banned ? '[banni]' : author.username) : 'Inconnu';
-  const isOwner = session && (session.id === topic.authorId || session.role === 'admin');
-  const isAdmin = session && session.role === 'admin';
-  const isLiked = session && topic.likes.includes(session.id);
-  const isDisliked = session && topic.dislikes.includes(session.id);
-  const statusBadge = { open: 'badge-open', closed: 'badge-closed', archived: 'badge-archived' }[topic.status];
-  const statusLabel = { open: 'Ouvert', closed: 'Fermé', archived: 'Archivé' }[topic.status];
+  const isOwner     = session && (session.id === topic.author_id || session.role === 'admin');
+  const tags        = topic.tags ? topic.tags.split(', ') : [];
+  const statusBadge = { open: 'badge-open', closed: 'badge-closed', archived: 'badge-archived' }[topic.status] || 'badge-open';
+  const statusLabel = { open: 'Ouvert', closed: 'Fermé', archived: 'Archivé' }[topic.status] || 'Ouvert';
 
   document.title = escHtml(topic.title) + ' — Plein les oreilles';
 
@@ -79,22 +78,15 @@ function renderTopic() {
     <div class="topic-header">
       <h1 class="topic-title">${escHtml(topic.title)}</h1>
       <div class="topic-meta-row">
-        <span> <strong>${escHtml(authorName)}</strong></span>
-        <span> ${escHtml(topic.category)}</span>
-        <span> ${formatDate(topic.createdAt)}</span>
-        <span> ${topic.views || 0} vues</span>
+        <span>👤 <strong>${escHtml(topic.author || 'Inconnu')}</strong></span>
+        <span>🕒 ${formatDate(new Date(topic.created_at).getTime())}</span>
         <span class="badge ${statusBadge}">${statusLabel}</span>
       </div>
       <div class="topic-tags">
-        ${(topic.tags || []).map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}
+        ${tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}
       </div>
       <p class="topic-body">${escHtml(topic.body)}</p>
       <div class="topic-actions">
-        <div class="vote-row">
-          <button class="vote-btn ${isLiked ? 'liked' : ''}" id="topic-like-btn" onclick="voteTopic('like')">↑ ${topic.likes.length}</button>
-          <button class="vote-btn ${isDisliked ? 'disliked' : ''}" id="topic-dislike-btn" onclick="voteTopic('dislikes')">↓ ${topic.dislikes.length}</button>
-          <span style="font-size:0.82rem;color:var(--text-muted);margin-left:6px">Score: ${topic.likes.length - topic.dislikes.length}</span>
-        </div>
         <div class="owner-actions">
           ${isOwner ? `<button class="btn btn-outline btn-sm" onclick="openEditStatus()">État</button>` : ''}
           ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="confirmDeleteTopic()">Supprimer</button>` : ''}
@@ -103,67 +95,61 @@ function renderTopic() {
     </div>`;
 }
 
-function voteTopic(type) {
-  if (!session) { toast('Connectez-vous pour voter.', 'error'); return; }
-  DB.toggleTopicLike(topicId, session.id, type);
-  topic = DB.findTopic(topicId);
-  renderTopic();
-}
-
 // ─── REPLIES ──────────────────────────────────────────────────────────────────
-function setSortReplies(sort, btn) {
+async function setSortReplies(sort, btn) {
   sortReplies = sort;
   repliesPage = 1;
   document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderReplies();
+  await renderReplies();
 }
 
-function renderReplies() {
-  topic = DB.findTopic(topicId);
-  let replies = DB.getTopicReplies(topicId);
+async function renderReplies() {
+  try {
+    const data     = await Messages.getByTopic(topicId, { page: repliesPage, limit: repliesPerPage, sort: sortReplies });
+    const replies  = data.data || [];
+    const pagination = data.pagination || {};
 
-  if (sortReplies === 'chrono') replies.sort((a, b) => a.createdAt - b.createdAt);
-  else replies.sort((a, b) => (b.likes.length - b.dislikes.length) - (a.likes.length - a.dislikes.length));
+    document.getElementById('replies-section').style.display = '';
+    document.getElementById('replies-count').textContent = `${pagination.total || 0} réponse${pagination.total !== 1 ? 's' : ''}`;
 
-  const total = replies.length;
-  const totalPages = Math.max(1, Math.ceil(total / repliesPerPage));
-  repliesPage = Math.min(repliesPage, totalPages);
-  const start = (repliesPage - 1) * repliesPerPage;
-  const page = replies.slice(start, start + repliesPerPage);
+    const list = document.getElementById('replies-list');
 
-  document.getElementById('replies-section').style.display = '';
-  document.getElementById('replies-count').textContent = `${total} réponse${total !== 1 ? 's' : ''}`;
+    if (replies.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="emoji">💬</div><p>Aucune réponse encore. Soyez le premier !</p></div>`;
+    } else {
+      list.innerHTML = replies.map(r => renderReplyCard(r)).join('');
 
-  const list = document.getElementById('replies-list');
-  if (page.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="emoji"></div><p>Aucune réponse encore. Soyez le premier !</p></div>`;
-  } else {
-    list.innerHTML = page.map(r => renderReplyCard(r)).join('');
-    // vote listeners
-    list.querySelectorAll('.reply-vote-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!session) { toast('Connectez-vous pour voter.', 'error'); return; }
-        DB.toggleReplyLike(btn.dataset.id, session.id, btn.dataset.type);
-        renderReplies();
+      // vote listeners
+      list.querySelectorAll('.reply-vote-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!session) { toast('Connectez-vous pour voter.', 'error'); return; }
+          try {
+            await Votes.vote(btn.dataset.id, btn.dataset.type);
+            await renderReplies();
+          } catch (e) {
+            toast(e.message || 'Erreur vote', 'error');
+          }
+        });
       });
-    });
-    // delete listeners
-    list.querySelectorAll('.delete-reply-btn').forEach(btn => {
-      btn.addEventListener('click', () => confirmDeleteReply(btn.dataset.id));
-    });
-  }
 
-  renderRepliesPagination(totalPages);
+      // delete listeners
+      list.querySelectorAll('.delete-reply-btn').forEach(btn => {
+        btn.addEventListener('click', () => confirmDeleteReply(btn.dataset.id));
+      });
+    }
+
+    renderRepliesPagination(pagination.totalPages || 1);
+
+  } catch (e) {
+    document.getElementById('replies-list').innerHTML = `<div class="empty-state"><p>Erreur de chargement.</p></div>`;
+  }
 }
 
 function renderReplyCard(r) {
-  const author = DB.findUser(r.authorId);
-  const authorName = author ? (author.banned ? '[banni]' : author.username) : 'Inconnu';
-  const initials = authorName.slice(0, 2).toUpperCase();
-  const isOwner = session && (session.id === topic.authorId || session.id === r.authorId || session.role === 'admin');
-  const isLiked = session && r.likes.includes(session.id);
-  const isDisliked = session && r.dislikes.includes(session.id);
+  const authorName = r.author || 'Inconnu';
+  const initials   = authorName.slice(0, 2).toUpperCase();
+  const isOwner    = session && (session.id === topic.author_id || session.id === r.author_id || session.role === 'admin');
 
   return `
     <div class="reply-card" id="reply-${r.id}">
@@ -171,15 +157,15 @@ function renderReplyCard(r) {
         <div class="reply-author">
           <div class="mini-avatar">${initials}</div>
           <span>${escHtml(authorName)}</span>
-          ${author && author.role === 'admin' ? '<span class="badge badge-admin" style="font-size:0.68rem">ADMIN</span>' : ''}
         </div>
-        <span class="reply-date">${formatDate(r.createdAt)}</span>
+        <span class="reply-date">${formatDate(new Date(r.sent_at).getTime())}</span>
       </div>
       <p class="reply-body">${escHtml(r.body)}</p>
       <div class="reply-footer">
         <div class="vote-row">
-          <button class="reply-vote-btn vote-btn ${isLiked ? 'liked' : ''}" data-id="${r.id}" data-type="like">👍 ${r.likes.length}</button>
-          <button class="reply-vote-btn vote-btn ${isDisliked ? 'disliked' : ''}" data-id="${r.id}" data-type="dislikes">👎 ${r.dislikes.length}</button>
+          <button class="reply-vote-btn vote-btn" data-id="${r.id}" data-type="like">👍</button>
+          <button class="reply-vote-btn vote-btn" data-id="${r.id}" data-type="dislike">👎</button>
+          <span style="font-size:0.82rem;color:var(--text-muted);margin-left:6px">Score: ${r.popularity_score || 0}</span>
         </div>
         ${isOwner ? `<button class="btn btn-ghost btn-sm delete-reply-btn" data-id="${r.id}">🗑 Supprimer</button>` : ''}
       </div>
@@ -197,16 +183,15 @@ function renderRepliesPagination(totalPages) {
   p.innerHTML = html;
 }
 
-function goRepliesPage(n) { repliesPage = n; renderReplies(); }
+async function goRepliesPage(n) { repliesPage = n; await renderReplies(); }
 
 // ─── REPLY FORM ───────────────────────────────────────────────────────────────
 function setupReplyForm() {
-  const formSection = document.getElementById('reply-form-section');
-  const loginPrompt = document.getElementById('login-prompt');
+  const formSection  = document.getElementById('reply-form-section');
+  const loginPrompt  = document.getElementById('login-prompt');
 
   if (!session) { loginPrompt.style.display = ''; return; }
 
-  // Don't allow replies on closed/archived topics unless admin
   if (topic.status !== 'open' && session.role !== 'admin') {
     formSection.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:20px">Ce topic est ${topic.status === 'closed' ? 'fermé' : 'archivé'}. Impossible de répondre.</p>`;
     formSection.style.display = '';
@@ -216,41 +201,52 @@ function setupReplyForm() {
   formSection.style.display = '';
 }
 
-function submitReply() {
+async function submitReply() {
   if (!session) { toast('Connectez-vous pour répondre.', 'error'); return; }
   const body = document.getElementById('reply-body').value.trim();
-  const err = document.getElementById('reply-error');
+  const err  = document.getElementById('reply-error');
   err.textContent = '';
+
   if (!body) { err.textContent = 'La réponse ne peut pas être vide.'; return; }
 
-  DB.createReply({ topicId, body, authorId: session.id });
-  document.getElementById('reply-body').value = '';
-  toast('Réponse publiée !', 'success');
-  sortReplies = 'chrono';
-  repliesPage = 999; // go to last page
-  renderReplies();
+  try {
+    await Messages.create(topicId, body);
+    document.getElementById('reply-body').value = '';
+    toast('Réponse publiée !', 'success');
+    repliesPage = 999;
+    await renderReplies();
+  } catch (e) {
+    err.textContent = e.message || 'Erreur lors de l\'envoi.';
+  }
 }
 
 // ─── DELETE ───────────────────────────────────────────────────────────────────
 function confirmDeleteTopic() {
   document.getElementById('confirm-delete-text').textContent = 'Voulez-vous vraiment supprimer ce topic et toutes ses réponses ?';
-  pendingDeleteFn = () => {
-    DB.deleteTopic(topicId);
-    closeModal('confirm-delete-modal');
-    toast('Topic supprimé.', 'success');
-    setTimeout(() => window.location.href = 'index.html', 800);
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    try {
+      await Topics.delete(topicId);
+      closeModal('confirm-delete-modal');
+      toast('Topic supprimé.', 'success');
+      setTimeout(() => window.location.href = 'index.html', 800);
+    } catch (e) {
+      toast(e.message || 'Erreur suppression', 'error');
+    }
   };
   openModal('confirm-delete-modal');
-  document.getElementById('confirm-delete-btn').onclick = pendingDeleteFn;
 }
 
 function confirmDeleteReply(replyId) {
   document.getElementById('confirm-delete-text').textContent = 'Voulez-vous vraiment supprimer cette réponse ?';
-  document.getElementById('confirm-delete-btn').onclick = () => {
-    DB.deleteReply(replyId);
-    closeModal('confirm-delete-modal');
-    toast('Réponse supprimée.', 'success');
-    renderReplies();
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    try {
+      await Messages.delete(replyId);
+      closeModal('confirm-delete-modal');
+      toast('Réponse supprimée.', 'success');
+      await renderReplies();
+    } catch (e) {
+      toast(e.message || 'Erreur suppression', 'error');
+    }
   };
   openModal('confirm-delete-modal');
 }
@@ -261,18 +257,22 @@ function openEditStatus() {
   openModal('edit-status-modal');
 }
 
-function saveStatus() {
+async function saveStatus() {
   const newStatus = document.getElementById('edit-status-select').value;
-  DB.updateTopic(topicId, { status: newStatus });
-  topic = DB.findTopic(topicId);
-  closeModal('edit-status-modal');
-  toast('État mis à jour.', 'success');
-  renderTopic();
-  setupReplyForm();
+  try {
+    await Topics.update(topicId, { status: newStatus });
+    topic.status = newStatus;
+    closeModal('edit-status-modal');
+    toast('État mis à jour.', 'success');
+    renderTopic();
+    setupReplyForm();
+  } catch (e) {
+    toast(e.message || 'Erreur', 'error');
+  }
 }
 
 // ─── MODALS ───────────────────────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
