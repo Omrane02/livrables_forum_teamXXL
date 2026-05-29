@@ -16,7 +16,7 @@ exports.getAllTopics = async (req, res) => {
         GROUP_CONCAT(tg.name SEPARATOR ', ') AS tags
       FROM topics t
       JOIN users u ON t.author_id = u.id
-      LEFT JOIN topic_tags tt ON t.topic_id = tt.topic_id
+      LEFT JOIN topic_tags tt ON t.id = tt.topic_id
       LEFT JOIN tags tg ON tt.tag_id = tg.id
       WHERE t.visibility = 'public'
       AND t.status != 'archived'

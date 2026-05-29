@@ -4,11 +4,11 @@ const controller = require('../controllers/messageController');
 const { verifyToken } = require('../middleware/auth');
 
 // Routes publiques
-router.get('/:topicId',  controller.getMessagesByTopic);   // GET /messages/:topicId
+router.get('/:topicId',  controller.getMessagesByTopic);  
 
 // Routes protégées
-router.post('/:topicId', verifyToken, controller.createMessage);   // POST /messages/:topicId
-router.put('/:id',       verifyToken, controller.updateMessage);   // PUT /messages/:id
-router.delete('/:id',    verifyToken, controller.deleteMessage);   // DELETE /messages/:id
+router.post('/:topicId', verifyToken, controller.createMessage);  
+router.put('/:id',       verifyToken, controller.updateMessage);   
+router.delete('/:id',    verifyToken, controller.deleteMessage); 
 
 module.exports = router;

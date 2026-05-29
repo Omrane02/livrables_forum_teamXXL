@@ -1,29 +1,47 @@
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let session = DB.getSession();
-let activeCategory = 'all';
-let activeArtist = null;
-let activeTag = null;
-let searchQuery = '';
-let sortMode = 'recent';
-let perPage = 10;
-let currentPage = 1;
-let newTopicTags = [];
-
-const ALL_TAGS = ['Hip-hop','R&B','Pop','Rock','Jazz','Electronic','Reggae','Classical','Indie',
-  'Kendrick Lamar','Daft Punk','Miles Davis','The Beatles','Bob Marley','Beethoven','Radiohead'];
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const session     = Session.get();
+let activeTag     = null;
+let searchQuery   = '';
+let sortMode      = 'recent';
+let perPage       = 10;
+let currentPage   = 1;
+let newTopicTags  = [];
+let allTags       = [];
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-renderHeaderUser();
-renderTopics();
-renderPopular();
-bindSidebar();
-bindSearch();
-bindSortPerPage();
-buildTagSuggestions();
+(async () => {
+  await loadTags();
+  renderHeaderUser();
+  renderTagFilterBar();
+  buildTagSuggestions();
+  bindSidebar();
+  bindSearch();
+  bindSortPerPage();
+  await renderTopics();
+  await renderPopular();
+
+  // handle ?search= param from topic.html redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('search')) {
+    searchQuery = urlParams.get('search');
+    document.getElementById('searchInput').value = searchQuery;
+    await renderTopics();
+  }
+})();
+
+// ─── LOAD TAGS ────────────────────────────────────────────────────────────────
+async function loadTags() {
+  try {
+    const data = await Topics.getTags();
+    allTags = data.data || [];
+  } catch {
+    allTags = [];
+  }
+}
 
 // ─── HEADER ───────────────────────────────────────────────────────────────────
 function renderHeaderUser() {
-  const area = document.getElementById('header-user-area');
+  const area   = document.getElementById('header-user-area');
   const newBtn = document.getElementById('new-topic-btn');
 
   if (!session) {
@@ -33,7 +51,7 @@ function renderHeaderUser() {
 
   newBtn.style.display = '';
   const initials = session.username.slice(0, 2).toUpperCase();
-  const isAdmin = session.role === 'admin';
+  const isAdmin  = session.role === 'admin';
 
   area.innerHTML = `
     <div class="user-chip" id="user-chip">
@@ -46,24 +64,19 @@ function renderHeaderUser() {
       </div>
     </div>`;
 
-  document.getElementById('user-chip').addEventListener('click', (e) => {
+  document.getElementById('user-chip').addEventListener('click', e => {
     e.currentTarget.classList.toggle('open');
   });
 }
 
-function doLogout() {
-  DB.clearSession();
-  window.location.reload();
-}
+function doLogout() { Auth.logout(); }
 
 // ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 function bindSidebar() {
   document.querySelectorAll('[data-category]').forEach(el => {
     el.addEventListener('click', e => {
       e.preventDefault();
-      activeCategory = el.dataset.category;
-      activeArtist = null;
-      activeTag = null;
+      activeTag = el.dataset.category !== 'all' ? el.dataset.category : null;
       currentPage = 1;
       document.querySelectorAll('.categorie').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
@@ -75,9 +88,7 @@ function bindSidebar() {
   document.querySelectorAll('[data-artist]').forEach(el => {
     el.addEventListener('click', e => {
       e.preventDefault();
-      activeArtist = el.dataset.artist;
-      activeCategory = null;
-      activeTag = null;
+      activeTag = el.dataset.artist;
       currentPage = 1;
       document.querySelectorAll('.categorie').forEach(c => c.classList.remove('active'));
       updateContentTitle();
@@ -85,178 +96,131 @@ function bindSidebar() {
     });
   });
 
-  // dropdown toggles
   document.querySelectorAll('.dropdown > .categorie').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
-      const dd = el.parentElement;
-      dd.classList.toggle('open');
+      el.parentElement.classList.toggle('open');
     });
   });
 }
 
 function updateContentTitle() {
   const t = document.getElementById('content-title');
-  if (searchQuery) { t.textContent = `Résultats pour "${searchQuery}"`; return; }
-  if (activeArtist) { t.textContent = activeArtist; return; }
-  if (activeTag) { t.textContent = '#' + activeTag; return; }
-  if (activeCategory === 'all' || !activeCategory) { t.textContent = 'Tous les topics'; return; }
-  t.textContent = activeCategory;
+  if (searchQuery)  { t.textContent = `Résultats pour "${searchQuery}"`; return; }
+  if (activeTag)    { t.textContent = '#' + activeTag; return; }
+  t.textContent = 'Tous les topics';
 }
 
 // ─── SEARCH ───────────────────────────────────────────────────────────────────
 function bindSearch() {
   const input = document.getElementById('searchInput');
+  let timeout;
   input.addEventListener('input', () => {
-    searchQuery = input.value.trim().toLowerCase();
-    currentPage = 1;
-    updateContentTitle();
-    renderTopics();
+    clearTimeout(timeout);
+    timeout = setTimeout(async () => {
+      searchQuery = input.value.trim();
+      currentPage = 1;
+      updateContentTitle();
+      await renderTopics();
+    }, 400); // debounce 400ms pour la recherche automatique
   });
 }
 
 // ─── SORT & PER PAGE ──────────────────────────────────────────────────────────
 function bindSortPerPage() {
-  document.getElementById('sort-select').addEventListener('change', e => {
+  document.getElementById('sort-select').addEventListener('change', async e => {
     sortMode = e.target.value;
     currentPage = 1;
-    renderTopics();
+    await renderTopics();
   });
-  document.getElementById('per-page-select').addEventListener('change', e => {
+  document.getElementById('per-page-select').addEventListener('change', async e => {
     perPage = parseInt(e.target.value);
     currentPage = 1;
-    renderTopics();
+    await renderTopics();
   });
 }
 
 // ─── TAG FILTER BAR ───────────────────────────────────────────────────────────
 function renderTagFilterBar() {
   const bar = document.getElementById('tag-filter-bar');
-  bar.innerHTML = ALL_TAGS.map(tag =>
-    `<span class="tag ${activeTag === tag ? 'active' : ''}" onclick="setTagFilter('${tag}')">${tag}</span>`
+  bar.innerHTML = allTags.map(tag =>
+    `<span class="tag ${activeTag === tag.name ? 'active' : ''}" onclick="setTagFilter('${escHtml(tag.name)}')">${escHtml(tag.name)}</span>`
   ).join('');
 }
 
-function setTagFilter(tag) {
-  if (activeTag === tag) { activeTag = null; } else {
-    activeTag = tag;
-    activeCategory = null;
-    activeArtist = null;
-    document.querySelectorAll('.categorie').forEach(c => c.classList.remove('active'));
-  }
+async function setTagFilter(tag) {
+  activeTag   = activeTag === tag ? null : tag;
   currentPage = 1;
+  renderTagFilterBar();
   updateContentTitle();
-  renderTopics();
+  await renderTopics();
 }
-
-renderTagFilterBar();
-
-// ─── FILTER + SORT TOPICS ─────────────────────────────────────────────────────
-function getFilteredTopics() {
-  let topics = DB.getTopics();
-
-  // search
-  if (searchQuery) {
-    topics = topics.filter(t => {
-      const hay = [t.title, t.body, t.category, ...(t.tags || [])].join(' ').toLowerCase();
-      return hay.includes(searchQuery);
-    });
-  }
-
-  // category
-  if (activeCategory && activeCategory !== 'all') {
-    topics = topics.filter(t => t.category === activeCategory || (t.tags || []).includes(activeCategory));
-  }
-
-  // artist tag
-  if (activeArtist) {
-    topics = topics.filter(t => (t.tags || []).includes(activeArtist) || t.title.includes(activeArtist) || t.body.includes(activeArtist));
-  }
-
-  // tag filter
-  if (activeTag) {
-    topics = topics.filter(t => (t.tags || []).includes(activeTag));
-  }
-
-  // sort
-  topics = [...topics];
-  if (sortMode === 'recent') topics.sort((a, b) => b.createdAt - a.createdAt);
-  else if (sortMode === 'ancien') topics.sort((a, b) => a.createdAt - b.createdAt);
-  else if (sortMode === 'popular') topics.sort((a, b) => score(b) - score(a));
-  else if (sortMode === 'like') topics.sort((a, b) => b.likes.length - a.likes.length);
-
-  return topics;
-}
-
-function score(t) { return (t.likes || []).length * 3 - (t.dislikes || []).length + (t.views || 0) * 0.1; }
 
 // ─── RENDER TOPICS ────────────────────────────────────────────────────────────
-function renderTopics() {
-  const filtered = getFilteredTopics();
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / perPage));
-  currentPage = Math.min(currentPage, totalPages);
-  const start = (currentPage - 1) * perPage;
-  const paginated = filtered.slice(start, start + perPage);
-
+async function renderTopics() {
   const container = document.getElementById('topics-list');
+  container.innerHTML = `<div class="empty-state"><div class="emoji">⏳</div><p>Chargement...</p></div>`;
 
-  // active filters display
-  const af = document.getElementById('active-filters');
-  const parts = [];
-  if (activeTag) parts.push(`Tag: <span class="tag active" onclick="setTagFilter('${activeTag}')">${activeTag} ×</span>`);
-  af.innerHTML = parts.join(' ');
-
-  if (paginated.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="emoji">🎵</div><p>Aucun topic trouvé.</p></div>`;
-    document.getElementById('pagination').innerHTML = '';
-    return;
-  }
-
-  container.innerHTML = paginated.map(t => renderTopicCard(t)).join('');
-
-  // attach vote listeners
-  container.querySelectorAll('.vote-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (!session) { toast('Connectez-vous pour voter.', 'error'); return; }
-      const topicId = btn.dataset.id;
-      const type = btn.dataset.type;
-      DB.toggleTopicLike(topicId, session.id, type);
-      renderTopics();
-      renderPopular();
+  try {
+    const sortParam = sortMode === 'popular' ? 'popularity' : 'date';
+    const data = await Topics.getAll({
+      page:   currentPage,
+      limit:  perPage,
+      search: searchQuery,
+      tag:    activeTag || '',
+      sort:   sortParam,
     });
-  });
 
-  renderPagination(totalPages);
+    const topics     = data.data || [];
+    const pagination = data.pagination || {};
+
+    const af = document.getElementById('active-filters');
+    af.innerHTML = activeTag
+      ? `Tag: <span class="tag active" onclick="setTagFilter('${escHtml(activeTag)}')">${escHtml(activeTag)} ×</span>`
+      : '';
+
+    if (topics.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="emoji">🎵</div><p>Aucun topic trouvé.</p></div>`;
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = topics.map(t => renderTopicCard(t)).join('');
+    renderPagination(pagination.totalPages || 1);
+
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state"><div class="emoji">❌</div><p>Erreur de chargement.</p></div>`;
+  }
 }
 
 function renderTopicCard(t) {
-  const author = DB.findUser(t.authorId);
-  const authorName = author ? (author.banned ? '[banni]' : author.username) : 'Inconnu';
-  const replies = DB.getTopicReplies(t.id);
-  const isLiked = session && t.likes.includes(session.id);
-  const isDisliked = session && t.dislikes.includes(session.id);
-  const statusBadge = { open: 'badge-open', closed: 'badge-closed', archived: 'badge-archived' }[t.status];
-  const statusLabel = { open: 'Ouvert', closed: 'Fermé', archived: 'Archivé' }[t.status];
+  const tags       = t.tags ? t.tags.split(', ') : [];
+  const statusBadge = { open: 'badge-open', closed: 'badge-closed', archived: 'badge-archived' }[t.status] || 'badge-open';
+  const statusLabel = { open: 'Ouvert', closed: 'Fermé', archived: 'Archivé' }[t.status] || 'Ouvert';
 
   return `
-  <div class="topic-card" onclick="goTopic('${t.id}')">
+  <div class="topic-card" onclick="goTopic(${t.id})">
     <div class="topic-card-header">
       <h3 class="topic-card-title">${escHtml(t.title)}</h3>
       <span class="badge ${statusBadge}">${statusLabel}</span>
     </div>
     <div class="topic-card-meta">
+<<<<<<< Updated upstream
       <span> ${escHtml(authorName)}</span>
       <span> ${escHtml(t.category)}</span>
       <span> ${timeAgo(t.createdAt)}</span>
       <span> ${t.views || 0} vues</span>
       <span> ${replies.length} réponses</span>
+=======
+      <span>👤 ${escHtml(t.author || 'Inconnu')}</span>
+      <span>🕒 ${timeAgo(new Date(t.created_at).getTime())}</span>
+>>>>>>> Stashed changes
     </div>
     <div class="topic-card-tags">
-      ${(t.tags || []).map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
+      ${tags.map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
     </div>
     <div class="topic-card-footer">
+<<<<<<< Updated upstream
       <div class="vote-row">
         <button class="vote-btn ${isLiked ? 'liked' : ''}" data-id="${t.id}" data-type="like" onclick="event.stopPropagation()">
           ↑ ${t.likes.length}
@@ -267,11 +231,29 @@ function renderTopicCard(t) {
         <span style="font-size:0.78rem;color:var(--text-muted);margin-left:4px">Score: ${topicScore(t)}</span>
       </div>
       <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(t.createdAt)}</span>
+=======
+      <span style="font-size:0.78rem;color:var(--text-muted)">Score: ${t.popularity_score || 0}</span>
+      <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(new Date(t.created_at).getTime())}</span>
+>>>>>>> Stashed changes
     </div>
   </div>`;
 }
 
-function topicScore(t) { return (t.likes || []).length - (t.dislikes || []).length; }
+// ─── POPULAR ──────────────────────────────────────────────────────────────────
+async function renderPopular() {
+  try {
+    const data = await Topics.getAll({ page: 1, limit: 5, sort: 'popularity' });
+    const topics = data.data || [];
+
+    document.getElementById('popular-topics').innerHTML = topics.map(t => `
+      <div class="popular-topic" onclick="goTopic(${t.id})">
+        <span class="popular-topic-title">${escHtml(t.title)}</span>
+        <span class="popular-topic-score">🔥 ${t.popularity_score || 0}</span>
+      </div>`).join('');
+  } catch {
+    document.getElementById('popular-topics').innerHTML = '';
+  }
+}
 
 // ─── PAGINATION ───────────────────────────────────────────────────────────────
 function renderPagination(totalPages) {
@@ -285,6 +267,7 @@ function renderPagination(totalPages) {
   p.innerHTML = html;
 }
 
+<<<<<<< Updated upstream
 function goPage(n) { currentPage = n; renderTopics(); window.scrollTo(0, 0); }
 
 // ─── POPULAR ──────────────────────────────────────────────────────────────────
@@ -299,14 +282,12 @@ function renderPopular() {
       <span class="popular-topic-score">↑ ${t.likes.length} · 💬 ${DB.getTopicReplies(t.id).length}</span>
     </div>`).join('');
 }
+=======
+async function goPage(n) { currentPage = n; await renderTopics(); window.scrollTo(0, 0); }
+>>>>>>> Stashed changes
 
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
-function goTopic(id) {
-  // increment views
-  const t = DB.findTopic(id);
-  if (t) DB.updateTopic(id, { views: (t.views || 0) + 1 });
-  window.location.href = `topic.html?id=${id}`;
-}
+function goTopic(id) { window.location.href = `topic.html?id=${id}`; }
 
 // ─── NEW TOPIC MODAL ──────────────────────────────────────────────────────────
 function openNewTopicModal() {
@@ -314,10 +295,9 @@ function openNewTopicModal() {
   openModal('new-topic-modal');
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// click outside modal to close
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
 });
@@ -325,8 +305,8 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 // ─── TAGS INPUT ───────────────────────────────────────────────────────────────
 function buildTagSuggestions() {
   const sugg = document.getElementById('tag-suggestions');
-  sugg.innerHTML = ALL_TAGS.map(t =>
-    `<span class="tag" onclick="addTag('${t}')">${t}</span>`
+  sugg.innerHTML = allTags.map(t =>
+    `<span class="tag" onclick="addTag('${escHtml(t.name)}')">${escHtml(t.name)}</span>`
   ).join('');
 
   document.getElementById('tag-text-input').addEventListener('keydown', e => {
@@ -355,7 +335,7 @@ function removeTag(tag) {
 }
 
 function renderTagPills() {
-  const area = document.getElementById('tags-input-area');
+  const area  = document.getElementById('tags-input-area');
   const input = document.getElementById('tag-text-input');
   area.innerHTML = '';
   newTopicTags.forEach(tag => {
@@ -367,30 +347,34 @@ function renderTagPills() {
   area.appendChild(input);
 }
 
-function submitNewTopic() {
-  const title = document.getElementById('nt-title').value.trim();
-  const body = document.getElementById('nt-body').value.trim();
-  const category = document.getElementById('nt-category').value;
-  const status = document.getElementById('nt-status').value;
-  const err = document.getElementById('nt-error');
+async function submitNewTopic() {
+  const title    = document.getElementById('nt-title').value.trim();
+  const body     = document.getElementById('nt-body').value.trim();
+  const status   = document.getElementById('nt-status').value;
+  const err      = document.getElementById('nt-error');
   err.textContent = '';
 
   if (!title) { err.textContent = 'Le titre est obligatoire.'; return; }
-  if (!body) { err.textContent = 'Le corps est obligatoire.'; return; }
-  if (!category) { err.textContent = 'Choisissez une catégorie.'; return; }
+  if (!body)  { err.textContent = 'Le corps est obligatoire.'; return; }
 
-  const tags = newTopicTags.length ? newTopicTags : [category];
+  // Convertir les noms de tags en IDs
+  const tagIds = allTags
+    .filter(t => newTopicTags.includes(t.name))
+    .map(t => t.id);
 
-  const topic = DB.createTopic({ title, body, category, tags, authorId: session.id, status });
-  closeModal('new-topic-modal');
-  document.getElementById('nt-title').value = '';
-  document.getElementById('nt-body').value = '';
-  document.getElementById('nt-category').value = '';
-  newTopicTags = [];
-  renderTagPills();
-  toast('Post publié !', 'success');
-  renderTopics();
-  renderPopular();
+  try {
+    await Topics.create({ title, body, tags: tagIds, visibility: status === 'private' ? 'private' : 'public' });
+    closeModal('new-topic-modal');
+    document.getElementById('nt-title').value = '';
+    document.getElementById('nt-body').value  = '';
+    newTopicTags = [];
+    renderTagPills();
+    toast('Post publié !', 'success');
+    await renderTopics();
+    await renderPopular();
+  } catch (e) {
+    err.textContent = e.message || 'Erreur lors de la création.';
+  }
 }
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
@@ -401,7 +385,7 @@ function escHtml(str) {
 function timeAgo(ts) {
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
-  if (m < 2) return 'à l\'instant';
+  if (m < 2)  return 'à l\'instant';
   if (m < 60) return `il y a ${m} min`;
   const h = Math.floor(m / 60);
   if (h < 24) return `il y a ${h}h`;
