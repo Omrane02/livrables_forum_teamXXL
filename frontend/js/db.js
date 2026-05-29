@@ -1,9 +1,5 @@
-<<<<<<< Updated upstream
-  // ─── DATABASE (localStorage) ────────────────────────────────────────────────
-=======
 // ─── API CONFIG ──────────────────────────────────────────────────────────────
 const API_URL = 'http://localhost:3001';
->>>>>>> Stashed changes
 
 // ─── SESSION (JWT dans localStorage) ─────────────────────────────────────────
 const Session = {

@@ -205,36 +205,15 @@ function renderTopicCard(t) {
       <span class="badge ${statusBadge}">${statusLabel}</span>
     </div>
     <div class="topic-card-meta">
-<<<<<<< Updated upstream
-      <span> ${escHtml(authorName)}</span>
-      <span> ${escHtml(t.category)}</span>
-      <span> ${timeAgo(t.createdAt)}</span>
-      <span> ${t.views || 0} vues</span>
-      <span> ${replies.length} réponses</span>
-=======
       <span>👤 ${escHtml(t.author || 'Inconnu')}</span>
       <span>🕒 ${timeAgo(new Date(t.created_at).getTime())}</span>
->>>>>>> Stashed changes
     </div>
     <div class="topic-card-tags">
       ${tags.map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
     </div>
     <div class="topic-card-footer">
-<<<<<<< Updated upstream
-      <div class="vote-row">
-        <button class="vote-btn ${isLiked ? 'liked' : ''}" data-id="${t.id}" data-type="like" onclick="event.stopPropagation()">
-          ↑ ${t.likes.length}
-        </button>
-        <button class="vote-btn ${isDisliked ? 'disliked' : ''}" data-id="${t.id}" data-type="dislikes" onclick="event.stopPropagation()">
-          ↓ ${t.dislikes.length}
-        </button>
-        <span style="font-size:0.78rem;color:var(--text-muted);margin-left:4px">Score: ${topicScore(t)}</span>
-      </div>
-      <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(t.createdAt)}</span>
-=======
       <span style="font-size:0.78rem;color:var(--text-muted)">Score: ${t.popularity_score || 0}</span>
       <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(new Date(t.created_at).getTime())}</span>
->>>>>>> Stashed changes
     </div>
   </div>`;
 }
@@ -267,24 +246,7 @@ function renderPagination(totalPages) {
   p.innerHTML = html;
 }
 
-<<<<<<< Updated upstream
-function goPage(n) { currentPage = n; renderTopics(); window.scrollTo(0, 0); }
-
-// ─── POPULAR ──────────────────────────────────────────────────────────────────
-function renderPopular() {
-  const popular = DB.getTopics()
-    .sort((a, b) => score(b) - score(a))
-    .slice(0, 5);
-
-  document.getElementById('popular-topics').innerHTML = popular.map(t => `
-    <div class="popular-topic" onclick="goTopic('${t.id}')">
-      <span class="popular-topic-title">${escHtml(t.title)}</span>
-      <span class="popular-topic-score">↑ ${t.likes.length} · 💬 ${DB.getTopicReplies(t.id).length}</span>
-    </div>`).join('');
-}
-=======
 async function goPage(n) { currentPage = n; await renderTopics(); window.scrollTo(0, 0); }
->>>>>>> Stashed changes
 
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function goTopic(id) { window.location.href = `topic.html?id=${id}`; }
