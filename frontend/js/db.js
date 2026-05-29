@@ -1,5 +1,5 @@
 // ─── API CONFIG ──────────────────────────────────────────────────────────────
-const API_URL = 'http://localhost:3001';
+const API_URL = 'http://localhost:5000';
 
 // ─── SESSION (JWT dans localStorage) ─────────────────────────────────────────
 const Session = {
