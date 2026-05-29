@@ -247,11 +247,11 @@ function renderTopicCard(t) {
       <span class="badge ${statusBadge}">${statusLabel}</span>
     </div>
     <div class="topic-card-meta">
-      <span>👤 ${escHtml(authorName)}</span>
-      <span>📁 ${escHtml(t.category)}</span>
-      <span>🕒 ${timeAgo(t.createdAt)}</span>
-      <span>👁 ${t.views || 0} vues</span>
-      <span>💬 ${replies.length} réponses</span>
+      <span> ${escHtml(authorName)}</span>
+      <span> ${escHtml(t.category)}</span>
+      <span> ${timeAgo(t.createdAt)}</span>
+      <span> ${t.views || 0} vues</span>
+      <span> ${replies.length} réponses</span>
     </div>
     <div class="topic-card-tags">
       ${(t.tags || []).map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
@@ -259,10 +259,10 @@ function renderTopicCard(t) {
     <div class="topic-card-footer">
       <div class="vote-row">
         <button class="vote-btn ${isLiked ? 'liked' : ''}" data-id="${t.id}" data-type="like" onclick="event.stopPropagation()">
-          👍 ${t.likes.length}
+          ↑ ${t.likes.length}
         </button>
         <button class="vote-btn ${isDisliked ? 'disliked' : ''}" data-id="${t.id}" data-type="dislikes" onclick="event.stopPropagation()">
-          👎 ${t.dislikes.length}
+          ↓ ${t.dislikes.length}
         </button>
         <span style="font-size:0.78rem;color:var(--text-muted);margin-left:4px">Score: ${topicScore(t)}</span>
       </div>
