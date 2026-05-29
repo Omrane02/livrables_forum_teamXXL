@@ -79,10 +79,10 @@ function renderTopic() {
     <div class="topic-header">
       <h1 class="topic-title">${escHtml(topic.title)}</h1>
       <div class="topic-meta-row">
-        <span>👤 <strong>${escHtml(authorName)}</strong></span>
-        <span>📁 ${escHtml(topic.category)}</span>
-        <span>🕒 ${formatDate(topic.createdAt)}</span>
-        <span>👁 ${topic.views || 0} vues</span>
+        <span> <strong>${escHtml(authorName)}</strong></span>
+        <span> ${escHtml(topic.category)}</span>
+        <span> ${formatDate(topic.createdAt)}</span>
+        <span> ${topic.views || 0} vues</span>
         <span class="badge ${statusBadge}">${statusLabel}</span>
       </div>
       <div class="topic-tags">
@@ -91,13 +91,13 @@ function renderTopic() {
       <p class="topic-body">${escHtml(topic.body)}</p>
       <div class="topic-actions">
         <div class="vote-row">
-          <button class="vote-btn ${isLiked ? 'liked' : ''}" id="topic-like-btn" onclick="voteTopic('like')">👍 ${topic.likes.length}</button>
-          <button class="vote-btn ${isDisliked ? 'disliked' : ''}" id="topic-dislike-btn" onclick="voteTopic('dislikes')">👎 ${topic.dislikes.length}</button>
+          <button class="vote-btn ${isLiked ? 'liked' : ''}" id="topic-like-btn" onclick="voteTopic('like')">↑ ${topic.likes.length}</button>
+          <button class="vote-btn ${isDisliked ? 'disliked' : ''}" id="topic-dislike-btn" onclick="voteTopic('dislikes')">↓ ${topic.dislikes.length}</button>
           <span style="font-size:0.82rem;color:var(--text-muted);margin-left:6px">Score: ${topic.likes.length - topic.dislikes.length}</span>
         </div>
         <div class="owner-actions">
-          ${isOwner ? `<button class="btn btn-outline btn-sm" onclick="openEditStatus()">✏️ État</button>` : ''}
-          ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="confirmDeleteTopic()">🗑 Supprimer</button>` : ''}
+          ${isOwner ? `<button class="btn btn-outline btn-sm" onclick="openEditStatus()">État</button>` : ''}
+          ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="confirmDeleteTopic()">Supprimer</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -137,7 +137,7 @@ function renderReplies() {
 
   const list = document.getElementById('replies-list');
   if (page.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="emoji">💬</div><p>Aucune réponse encore. Soyez le premier !</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="emoji"></div><p>Aucune réponse encore. Soyez le premier !</p></div>`;
   } else {
     list.innerHTML = page.map(r => renderReplyCard(r)).join('');
     // vote listeners

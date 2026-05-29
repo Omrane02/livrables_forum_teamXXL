@@ -296,7 +296,7 @@ function renderPopular() {
   document.getElementById('popular-topics').innerHTML = popular.map(t => `
     <div class="popular-topic" onclick="goTopic('${t.id}')">
       <span class="popular-topic-title">${escHtml(t.title)}</span>
-      <span class="popular-topic-score">👍 ${t.likes.length} · 💬 ${DB.getTopicReplies(t.id).length}</span>
+      <span class="popular-topic-score">↑ ${t.likes.length} · 💬 ${DB.getTopicReplies(t.id).length}</span>
     </div>`).join('');
 }
 
