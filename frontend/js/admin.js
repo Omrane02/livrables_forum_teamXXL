@@ -54,12 +54,12 @@ function renderTopicsTab() {
       <td>${escHtml(author ? author.username : 'Inconnu')}</td>
       <td>${escHtml(t.category)}</td>
       <td><span class="badge ${statusBadge[t.status]}">${statusLabel[t.status]}</span></td>
-      <td>👍 ${t.likes.length} / 👎 ${t.dislikes.length}</td>
-      <td>💬 ${replies}</td>
+      <td>↑ ${t.likes.length} / ↓ ${t.dislikes.length}</td>
+      <td> ${replies}</td>
       <td>${formatDate(t.createdAt)}</td>
       <td class="td-actions">
-        <button class="btn btn-outline btn-sm" onclick="adminEditStatus('${t.id}', '${t.status}')">✏️ État</button>
-        <button class="btn btn-danger btn-sm" onclick="adminDeleteTopic('${t.id}')">🗑</button>
+        <button class="btn btn-outline btn-sm" onclick="adminEditStatus('${t.id}', '${t.status}')"> État</button>
+        <button class="btn btn-danger btn-sm" onclick="adminDeleteTopic('${t.id}')">Suprimer</button>
       </td>
     </tr>`;
   }).join('');
@@ -77,10 +77,10 @@ function renderRepliesTab() {
       <td><a href="topic.html?id=${r.topicId}" style="color:var(--accent-strong)">${escHtml(topic ? topic.title : '[supprimé]')}</a></td>
       <td>${escHtml(author ? author.username : 'Inconnu')}</td>
       <td>${escHtml(r.body.slice(0, 80))}${r.body.length > 80 ? '…' : ''}</td>
-      <td>👍 ${r.likes.length} / 👎 ${r.dislikes.length}</td>
+      <td>↑ ${r.likes.length} / ↓ ${r.dislikes.length}</td>
       <td>${formatDate(r.createdAt)}</td>
       <td class="td-actions">
-        <button class="btn btn-danger btn-sm" onclick="adminDeleteReply('${r.id}')">🗑 Supprimer</button>
+        <button class="btn btn-danger btn-sm" onclick="adminDeleteReply('${r.id}')">Supprimer</button>
       </td>
     </tr>`;
   }).join('');
@@ -104,7 +104,7 @@ function renderUsersTab() {
       <td class="td-actions">
         ${u.id !== session.id && u.role !== 'admin' ? `
           <button class="btn btn-sm ${u.banned ? 'btn-outline' : 'btn-danger'}" onclick="toggleBan('${u.id}', ${u.banned})">
-            ${u.banned ? '✅ Débannir' : '🚫 Bannir'}
+            ${u.banned ? 'Débannir' : 'Bannir'}
           </button>` : '<em style="color:var(--text-muted);font-size:0.8rem">Protégé</em>'}
       </td>
     </tr>`;
