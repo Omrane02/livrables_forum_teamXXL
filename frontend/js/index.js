@@ -20,7 +20,6 @@ let allTags       = [];
   await renderTopics();
   await renderPopular();
 
-  // handle ?search= param from topic.html redirect
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('search')) {
     searchQuery = urlParams.get('search');
@@ -106,8 +105,8 @@ function bindSidebar() {
 
 function updateContentTitle() {
   const t = document.getElementById('content-title');
-  if (searchQuery)  { t.textContent = `Résultats pour "${searchQuery}"`; return; }
-  if (activeTag)    { t.textContent = '#' + activeTag; return; }
+  if (searchQuery) { t.textContent = `Résultats pour "${searchQuery}"`; return; }
+  if (activeTag)   { t.textContent = '#' + activeTag; return; }
   t.textContent = 'Tous les topics';
 }
 
@@ -122,7 +121,7 @@ function bindSearch() {
       currentPage = 1;
       updateContentTitle();
       await renderTopics();
-    }, 400); // debounce 400ms pour la recherche automatique
+    }, 400);
   });
 }
 
@@ -194,53 +193,43 @@ async function renderTopics() {
 }
 
 function renderTopicCard(t) {
-  const tags       = t.tags ? t.tags.split(', ') : [];
+  const tags        = t.tags ? t.tags.split(', ') : [];
   const statusBadge = { open: 'badge-open', closed: 'badge-closed', archived: 'badge-archived' }[t.status] || 'badge-open';
   const statusLabel = { open: 'Ouvert', closed: 'Fermé', archived: 'Archivé' }[t.status] || 'Ouvert';
 
   return `
-<div class="topic-card" onclick="goTopic('${t.id}')">
+  <div class="topic-card" onclick="goTopic('${t.id}')">
     <div class="topic-card-header">
       <h3 class="topic-card-title">${escHtml(t.title)}</h3>
       <span class="badge ${statusBadge}">${statusLabel}</span>
     </div>
     <div class="topic-card-meta">
-      <span> ${escHtml(authorName)}</span>
-      <span> ${escHtml(t.category)}</span>
-      <span> ${timeAgo(t.createdAt)}</span>
-      <span> ${t.views || 0} vues</span>
-      <span> ${replies.length} réponses</span>
+      <span>👤 ${escHtml(t.author || 'Inconnu')}</span>
+      <span>🕒 ${timeAgo(new Date(t.created_at).getTime())}</span>
     </div>
     <div class="topic-card-tags">
-      ${(t.tags || []).map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
+      ${tags.map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
     </div>
     <div class="topic-card-footer">
-      <div class="vote-row">
-        <button class="vote-btn ${isLiked ? 'liked' : ''}" data-id="${t.id}" data-type="like" onclick="event.stopPropagation()">
-          ↑ ${t.likes.length}
-        </button>
-        <button class="vote-btn ${isDisliked ? 'disliked' : ''}" data-id="${t.id}" data-type="dislikes" onclick="event.stopPropagation()">
-          ↓ ${t.dislikes.length}
-        </button>
-        <span style="font-size:0.78rem;color:var(--text-muted);margin-left:4px">Score: ${topicScore(t)}</span>
-      </div>
-      <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(t.createdAt)}</span>
+      <span style="font-size:0.78rem;color:var(--text-muted)">Score: ${t.popularity_score || 0}</span>
+      <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(new Date(t.created_at).getTime())}</span>
     </div>
   </div>`;
 }
 
-
 // ─── POPULAR ──────────────────────────────────────────────────────────────────
-function renderPopular() {
-  const popular = DB.getTopics()
-      .sort((a, b) => score(b) - score(a))
-      .slice(0, 5);
-
-  document.getElementById('popular-topics').innerHTML = popular.map(t => `
-    <div class="popular-topic" onclick="goTopic('${t.id}')">
-      <span class="popular-topic-title">${escHtml(t.title)}</span>
-      <span class="popular-topic-score">👍 ${t.likes.length} · 💬 ${DB.getTopicReplies(t.id).length}</span>
-    </div>`).join('');
+async function renderPopular() {
+  try {
+    const data   = await Topics.getAll({ page: 1, limit: 5, sort: 'popularity' });
+    const topics = data.data || [];
+    document.getElementById('popular-topics').innerHTML = topics.map(t => `
+      <div class="popular-topic" onclick="goTopic('${t.id}')">
+        <span class="popular-topic-title">${escHtml(t.title)}</span>
+        <span class="popular-topic-score">🔥 ${t.popularity_score || 0}</span>
+      </div>`).join('');
+  } catch {
+    document.getElementById('popular-topics').innerHTML = '';
+  }
 }
 
 // ─── PAGINATION ───────────────────────────────────────────────────────────────
@@ -319,16 +308,15 @@ function renderTagPills() {
 }
 
 async function submitNewTopic() {
-  const title    = document.getElementById('nt-title').value.trim();
-  const body     = document.getElementById('nt-body').value.trim();
-  const status   = document.getElementById('nt-status').value;
-  const err      = document.getElementById('nt-error');
+  const title = document.getElementById('nt-title').value.trim();
+  const body  = document.getElementById('nt-body').value.trim();
+  const status = document.getElementById('nt-status').value;
+  const err   = document.getElementById('nt-error');
   err.textContent = '';
 
   if (!title) { err.textContent = 'Le titre est obligatoire.'; return; }
   if (!body)  { err.textContent = 'Le corps est obligatoire.'; return; }
 
-  // Convertir les noms de tags en IDs
   const tagIds = allTags
     .filter(t => newTopicTags.includes(t.name))
     .map(t => t.id);
