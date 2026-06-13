@@ -6,7 +6,7 @@ exports.getAllTopics = async (req, res) => {
     const limit  = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
     const search = req.query.search || null;
-    const tagId  = req.query.tag    || null;
+    const tag    = req.query.tag    || null;
 
     let query = `
       SELECT DISTINCT
@@ -29,9 +29,9 @@ exports.getAllTopics = async (req, res) => {
       params.push(`%${search}%`);
     }
 
-    if (tagId) {
-      query += ` AND tt.tag_id = ?`;
-      params.push(tagId);
+    if (tag) {
+      query += ` AND tg.name = ?`;
+      params.push(tag);
     }
 
     query += ` GROUP BY t.id ORDER BY t.created_at DESC LIMIT ? OFFSET ?`;
@@ -39,11 +39,11 @@ exports.getAllTopics = async (req, res) => {
 
     const [topics] = await db.execute(query, params);
 
-    // Compter le total pour la pagination
     let countQuery = `
       SELECT COUNT(DISTINCT t.id) AS total
       FROM topics t
       LEFT JOIN topic_tags tt ON t.id = tt.topic_id
+      LEFT JOIN tags tg ON tt.tag_id = tg.id
       WHERE t.visibility = 'public' AND t.status != 'archived'
     `;
     const countParams = [];
@@ -52,9 +52,10 @@ exports.getAllTopics = async (req, res) => {
       countQuery += ` AND t.title LIKE ?`;
       countParams.push(`%${search}%`);
     }
-    if (tagId) {
-      countQuery += ` AND tt.tag_id = ?`;
-      countParams.push(tagId);
+
+    if (tag) {
+      countQuery += ` AND tg.name = ?`;
+      countParams.push(tag);
     }
 
     const [[{ total }]] = await db.execute(countQuery, countParams);
@@ -62,22 +63,23 @@ exports.getAllTopics = async (req, res) => {
     return res.status(200).json({
       message: 'Topics récupérés avec succès',
       data: topics,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
     });
+
   } catch (err) {
     return res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// GET /topics/:id
-// Consulter un topic (accessible sans connexion)
-// ─────────────────────────────────────────────
+exports.getAllTags = async (req, res) => {
+  try {
+    const [tags] = await db.execute(`SELECT * FROM tags ORDER BY name ASC`);
+    return res.status(200).json({ message: 'Tags récupérés', data: tags });
+  } catch (err) {
+    return res.status(500).json({ message: 'Erreur serveur', error: err.message });
+  }
+};
+
 exports.getTopicById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -85,7 +87,7 @@ exports.getTopicById = async (req, res) => {
     const [topics] = await db.execute(`
       SELECT
         t.id, t.title, t.body, t.status, t.visibility,
-        t.created_at, t.updated_at,
+        t.created_at, t.updated_at, t.author_id,
         u.username AS author,
         GROUP_CONCAT(tg.name SEPARATOR ', ') AS tags
       FROM topics t
@@ -117,11 +119,6 @@ exports.getTopicById = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// POST /topics
-// Créer un topic + premier message (F-4)
-// Authentification requise
-// ─────────────────────────────────────────────
 exports.createTopic = async (req, res) => {
   const { title, body, tags, visibility } = req.body;
   const author_id = req.user.id;
@@ -134,16 +131,13 @@ exports.createTopic = async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    // Créer le topic
     const [result] = await conn.execute(
-      `INSERT INTO topics (author_id, title, body, visibility)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT INTO topics (author_id, title, body, visibility) VALUES (?, ?, ?, ?)`,
       [author_id, title, body, visibility || 'public']
     );
 
     const topicId = result.insertId;
 
-    // Associer les tags
     if (tags && tags.length > 0) {
       for (const tagId of tags) {
         await conn.execute(
@@ -153,20 +147,12 @@ exports.createTopic = async (req, res) => {
       }
     }
 
-    // Créer le premier message automatiquement (spec F-4)
-    await conn.execute(
-      `INSERT INTO messages (topic_id, author_id, body) VALUES (?, ?, ?)`,
-      [topicId, author_id, body]
-    );
-
-    // Incrémenter le topic_count du profil
     await conn.execute(
       `UPDATE profiles SET topic_count = topic_count + 1 WHERE user_id = ?`,
       [author_id]
     );
 
     await conn.commit();
-
     return res.status(201).json({ message: 'Topic créé avec succès', data: { id: topicId } });
 
   } catch (err) {
@@ -177,19 +163,13 @@ exports.createTopic = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// PUT /topics/:id
-// Modifier un topic (propriétaire uniquement)
-// ─────────────────────────────────────────────
 exports.updateTopic = async (req, res) => {
   const { id } = req.params;
   const { title, body, status, visibility, tags } = req.body;
   const userId = req.user.id;
 
   try {
-    const [topics] = await db.execute(
-      `SELECT * FROM topics WHERE id = ?`, [id]
-    );
+    const [topics] = await db.execute(`SELECT * FROM topics WHERE id = ?`, [id]);
 
     if (topics.length === 0) {
       return res.status(404).json({ message: 'Topic introuvable' });
@@ -200,8 +180,7 @@ exports.updateTopic = async (req, res) => {
     }
 
     await db.execute(
-      `UPDATE topics SET title = ?, body = ?, status = ?, visibility = ?, updated_at = NOW()
-       WHERE id = ?`,
+      `UPDATE topics SET title = ?, body = ?, status = ?, visibility = ?, updated_at = NOW() WHERE id = ?`,
       [
         title      || topics[0].title,
         body       || topics[0].body,
@@ -211,7 +190,6 @@ exports.updateTopic = async (req, res) => {
       ]
     );
 
-    // Mettre à jour les tags si fournis
     if (tags && tags.length > 0) {
       await db.execute(`DELETE FROM topic_tags WHERE topic_id = ?`, [id]);
       for (const tagId of tags) {
@@ -229,19 +207,12 @@ exports.updateTopic = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// DELETE /topics/:id
-// Supprimer un topic + tout ce qui y est lié (F-6)
-// Propriétaire ou admin uniquement
-// ─────────────────────────────────────────────
 exports.deleteTopic = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
 
   try {
-    const [topics] = await db.execute(
-      `SELECT * FROM topics WHERE id = ?`, [id]
-    );
+    const [topics] = await db.execute(`SELECT * FROM topics WHERE id = ?`, [id]);
 
     if (topics.length === 0) {
       return res.status(404).json({ message: 'Topic introuvable' });
@@ -251,11 +222,8 @@ exports.deleteTopic = async (req, res) => {
       return res.status(403).json({ message: 'Accès refusé' });
     }
 
-    // Le CASCADE dans la BDD supprime automatiquement
-    // topic_tags, messages et votes liés
     await db.execute(`DELETE FROM topics WHERE id = ?`, [id]);
 
-    // Décrémenter le topic_count du profil
     await db.execute(
       `UPDATE profiles SET topic_count = topic_count - 1 WHERE user_id = ?`,
       [topics[0].author_id]
@@ -263,19 +231,6 @@ exports.deleteTopic = async (req, res) => {
 
     return res.status(200).json({ message: 'Topic supprimé avec succès' });
 
-  } catch (err) {
-    return res.status(500).json({ message: 'Erreur serveur', error: err.message });
-  }
-};
-
-// ─────────────────────────────────────────────
-// GET /topics/tags
-// Récupérer tous les tags disponibles (F-10)
-// ─────────────────────────────────────────────
-exports.getAllTags = async (req, res) => {
-  try {
-    const [tags] = await db.execute(`SELECT * FROM tags ORDER BY name ASC`);
-    return res.status(200).json({ message: 'Tags récupérés', data: tags });
   } catch (err) {
     return res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
