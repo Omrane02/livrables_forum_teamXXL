@@ -21,12 +21,10 @@ let topicVotes     = { likes: 0, dislikes: 0, score: 0, user_vote: null };
     const data = await Topics.getById(topicId);
     topic = data.data;
 
-    if (session) {
-      try {
-        const vData = await Votes.getTopicVotes(topicId);
-        topicVotes = vData.data;
-      } catch { }
-    }
+    try {
+      const vData = await Votes.getTopicVotes(topicId);
+      topicVotes = vData.data;
+    } catch { }
 
     renderTopic();
     await renderReplies();
@@ -132,8 +130,8 @@ async function voteOnTopic(vote_type) {
 
 // ─── EDIT TOPIC ───────────────────────────────────────────────────────────────
 function openEditTopic() {
-  document.getElementById('edit-topic-title').value   = topic.title;
-  document.getElementById('edit-topic-body').value    = topic.body;
+  document.getElementById('edit-topic-title').value      = topic.title;
+  document.getElementById('edit-topic-body').value       = topic.body;
   document.getElementById('edit-topic-error').textContent = '';
   openModal('edit-topic-modal');
 }

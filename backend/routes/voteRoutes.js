@@ -7,8 +7,8 @@ const { verifyToken } = require('../middleware/auth');
 router.post('/message/:messageId', verifyToken, controller.voteMessage);
 router.get('/message/:messageId',  verifyToken, controller.getMessageVotes);
 
-// Votes sur les topics
+// Votes sur les topics — GET public, POST protégé
 router.post('/topic/:topicId', verifyToken, controller.voteTopic);
-router.get('/topic/:topicId',  verifyToken, controller.getTopicVotes);
+router.get('/topic/:topicId',  controller.getTopicVotes);
 
 module.exports = router;

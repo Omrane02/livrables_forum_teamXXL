@@ -2,7 +2,6 @@ const db = require('../config/db');
 
 // ─────────────────────────────────────────────
 // POST /votes/message/:messageId
-// Liker ou disliker un message (F-7)
 // ─────────────────────────────────────────────
 exports.voteMessage = async (req, res) => {
   const { messageId } = req.params;
@@ -78,11 +77,10 @@ exports.voteMessage = async (req, res) => {
 
 // ─────────────────────────────────────────────
 // GET /votes/message/:messageId
-// Récupérer le score et le vote de l'utilisateur
 // ─────────────────────────────────────────────
 exports.getMessageVotes = async (req, res) => {
   const { messageId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user ? req.user.id : null;
 
   try {
     const [messages] = await db.execute(
@@ -93,16 +91,20 @@ exports.getMessageVotes = async (req, res) => {
       return res.status(404).json({ message: 'Message introuvable' });
     }
 
-    const [userVote] = await db.execute(
-      `SELECT vote_type FROM votes WHERE user_id = ? AND message_id = ?`,
-      [userId, messageId]
-    );
+    let userVote = null;
+    if (userId) {
+      const [rows] = await db.execute(
+        `SELECT vote_type FROM votes WHERE user_id = ? AND message_id = ?`,
+        [userId, messageId]
+      );
+      if (rows.length > 0) userVote = rows[0].vote_type;
+    }
 
     return res.status(200).json({
       message: 'Votes récupérés',
       data: {
         popularity_score: messages[0].popularity_score,
-        user_vote: userVote.length > 0 ? userVote[0].vote_type : null,
+        user_vote: userVote,
       },
     });
 
@@ -113,7 +115,6 @@ exports.getMessageVotes = async (req, res) => {
 
 // ─────────────────────────────────────────────
 // POST /votes/topic/:topicId
-// Liker ou disliker un topic
 // ─────────────────────────────────────────────
 exports.voteTopic = async (req, res) => {
   const { topicId } = req.params;
@@ -174,11 +175,11 @@ exports.voteTopic = async (req, res) => {
 
 // ─────────────────────────────────────────────
 // GET /votes/topic/:topicId
-// Récupérer les votes d'un topic
+// Public — user_vote null si non connecté
 // ─────────────────────────────────────────────
 exports.getTopicVotes = async (req, res) => {
   const { topicId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user ? req.user.id : null;
 
   try {
     const [[{ likes }]] = await db.execute(
@@ -190,10 +191,14 @@ exports.getTopicVotes = async (req, res) => {
       [topicId]
     );
 
-    const [userVote] = await db.execute(
-      `SELECT vote_type FROM topic_votes WHERE user_id = ? AND topic_id = ?`,
-      [userId, topicId]
-    );
+    let userVote = null;
+    if (userId) {
+      const [rows] = await db.execute(
+        `SELECT vote_type FROM topic_votes WHERE user_id = ? AND topic_id = ?`,
+        [userId, topicId]
+      );
+      if (rows.length > 0) userVote = rows[0].vote_type;
+    }
 
     return res.status(200).json({
       message: 'Votes récupérés',
@@ -201,7 +206,7 @@ exports.getTopicVotes = async (req, res) => {
         likes,
         dislikes,
         score: likes - dislikes,
-        user_vote: userVote.length > 0 ? userVote[0].vote_type : null,
+        user_vote: userVote,
       },
     });
 
