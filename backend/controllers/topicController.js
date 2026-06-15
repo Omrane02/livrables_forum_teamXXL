@@ -13,7 +13,9 @@ exports.getAllTopics = async (req, res) => {
         t.id, t.title, t.body, t.status, t.visibility,
         t.created_at, t.updated_at,
         u.username AS author,
-        GROUP_CONCAT(tg.name SEPARATOR ', ') AS tags
+        GROUP_CONCAT(tg.name SEPARATOR ', ') AS tags,
+        (SELECT COUNT(*) FROM topic_votes WHERE topic_id = t.id AND vote_type = 'like') -
+        (SELECT COUNT(*) FROM topic_votes WHERE topic_id = t.id AND vote_type = 'dislike') AS score
       FROM topics t
       JOIN users u ON t.author_id = u.id
       LEFT JOIN topic_tags tt ON t.id = tt.topic_id

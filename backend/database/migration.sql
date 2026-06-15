@@ -112,3 +112,16 @@ CREATE TABLE friendships (
     FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (addressee_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE topic_votes (
+    id          INT PRIMARY KEY AUTO_INCREMENT,
+    user_id     INT NOT NULL,
+    topic_id    INT NOT NULL,
+    vote_type   ENUM('like', 'dislike') NOT NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_topic_vote (user_id, topic_id),
+
+    FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+    FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

@@ -3,8 +3,12 @@ const router     = express.Router();
 const controller = require('../controllers/voteController');
 const { verifyToken } = require('../middleware/auth');
 
-// Routes protégées (connexion requise)
-router.post('/:messageId', verifyToken, controller.vote);      // POST /votes/:messageId
-router.get('/:messageId',  verifyToken, controller.getVotes);  // GET  /votes/:messageId
+// Votes sur les messages
+router.post('/message/:messageId', verifyToken, controller.voteMessage);
+router.get('/message/:messageId',  verifyToken, controller.getMessageVotes);
+
+// Votes sur les topics
+router.post('/topic/:topicId', verifyToken, controller.voteTopic);
+router.get('/topic/:topicId',  verifyToken, controller.getTopicVotes);
 
 module.exports = router;
