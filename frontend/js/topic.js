@@ -6,6 +6,7 @@ let topic          = null;
 let sortReplies    = 'date';
 let repliesPage    = 1;
 let repliesPerPage = 10;
+let topicVotes     = { likes: 0, dislikes: 0, score: 0, user_vote: null };
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 (async () => {
@@ -19,6 +20,14 @@ let repliesPerPage = 10;
   try {
     const data = await Topics.getById(topicId);
     topic = data.data;
+
+    if (session) {
+      try {
+        const vData = await Votes.getTopicVotes(topicId);
+        topicVotes = vData.data;
+      } catch { }
+    }
+
     renderTopic();
     await renderReplies();
     setupReplyForm();
@@ -71,6 +80,8 @@ function renderTopic() {
   const tags        = topic.tags ? topic.tags.split(', ') : [];
   const statusBadge = { open: 'badge-open', closed: 'badge-closed', archived: 'badge-archived' }[topic.status] || 'badge-open';
   const statusLabel = { open: 'Ouvert', closed: 'Fermé', archived: 'Archivé' }[topic.status] || 'Ouvert';
+  const isLiked     = topicVotes.user_vote === 'like';
+  const isDisliked  = topicVotes.user_vote === 'dislike';
 
   document.title = escHtml(topic.title) + ' — Plein les oreilles';
 
@@ -87,12 +98,65 @@ function renderTopic() {
       </div>
       <p class="topic-body">${escHtml(topic.body)}</p>
       <div class="topic-actions">
+        <div class="vote-row">
+          <button class="vote-btn ${isLiked ? 'liked' : ''}" onclick="voteOnTopic('like')">
+            👍 ${topicVotes.likes}
+          </button>
+          <button class="vote-btn ${isDisliked ? 'disliked' : ''}" onclick="voteOnTopic('dislike')">
+            👎 ${topicVotes.dislikes}
+          </button>
+          <span style="font-size:0.82rem;color:var(--text-muted);margin-left:6px">Score: ${topicVotes.score}</span>
+        </div>
         <div class="owner-actions">
-          ${isOwner ? `<button class="btn btn-outline btn-sm" onclick="openEditStatus()">✏️ État</button>` : ''}
+          ${isOwner ? `<button class="btn btn-outline btn-sm" onclick="openEditTopic()">✏️ Modifier</button>` : ''}
+          ${isOwner ? `<button class="btn btn-outline btn-sm" onclick="openEditStatus()">🔄 État</button>` : ''}
           ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="confirmDeleteTopic()">🗑 Supprimer</button>` : ''}
         </div>
       </div>
     </div>`;
+}
+
+// ─── VOTE TOPIC ───────────────────────────────────────────────────────────────
+async function voteOnTopic(vote_type) {
+  if (!session) { toast('Connectez-vous pour voter.', 'error'); return; }
+
+  try {
+    await Votes.voteTopic(topicId, vote_type);
+    const vData = await Votes.getTopicVotes(topicId);
+    topicVotes = vData.data;
+    renderTopic();
+  } catch (e) {
+    toast(e.message || 'Erreur vote', 'error');
+  }
+}
+
+// ─── EDIT TOPIC ───────────────────────────────────────────────────────────────
+function openEditTopic() {
+  document.getElementById('edit-topic-title').value   = topic.title;
+  document.getElementById('edit-topic-body').value    = topic.body;
+  document.getElementById('edit-topic-error').textContent = '';
+  openModal('edit-topic-modal');
+}
+
+async function saveTopicEdit() {
+  const title = document.getElementById('edit-topic-title').value.trim();
+  const body  = document.getElementById('edit-topic-body').value.trim();
+  const err   = document.getElementById('edit-topic-error');
+  err.textContent = '';
+
+  if (!title) { err.textContent = 'Le titre est obligatoire.'; return; }
+  if (!body)  { err.textContent = 'Le corps est obligatoire.'; return; }
+
+  try {
+    await Topics.update(topicId, { title, body });
+    topic.title = title;
+    topic.body  = body;
+    closeModal('edit-topic-modal');
+    toast('Topic modifié avec succès.', 'success');
+    renderTopic();
+  } catch (e) {
+    err.textContent = e.message || 'Erreur lors de la modification.';
+  }
 }
 
 // ─── REPLIES ──────────────────────────────────────────────────────────────────
@@ -106,8 +170,8 @@ async function setSortReplies(sort, btn) {
 
 async function renderReplies() {
   try {
-    const data     = await Messages.getByTopic(topicId, { page: repliesPage, limit: repliesPerPage, sort: sortReplies });
-    const replies  = data.data || [];
+    const data       = await Messages.getByTopic(topicId, { page: repliesPage, limit: repliesPerPage, sort: sortReplies });
+    const replies    = data.data || [];
     const pagination = data.pagination || {};
 
     document.getElementById('replies-section').style.display = '';
@@ -120,12 +184,11 @@ async function renderReplies() {
     } else {
       list.innerHTML = replies.map(r => renderReplyCard(r)).join('');
 
-      // vote listeners
       list.querySelectorAll('.reply-vote-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (!session) { toast('Connectez-vous pour voter.', 'error'); return; }
           try {
-            await Votes.vote(btn.dataset.id, btn.dataset.type);
+            await Votes.voteMessage(btn.dataset.id, btn.dataset.type);
             await renderReplies();
           } catch (e) {
             toast(e.message || 'Erreur vote', 'error');
@@ -133,7 +196,6 @@ async function renderReplies() {
         });
       });
 
-      // delete listeners
       list.querySelectorAll('.delete-reply-btn').forEach(btn => {
         btn.addEventListener('click', () => confirmDeleteReply(btn.dataset.id));
       });
@@ -187,8 +249,8 @@ async function goRepliesPage(n) { repliesPage = n; await renderReplies(); }
 
 // ─── REPLY FORM ───────────────────────────────────────────────────────────────
 function setupReplyForm() {
-  const formSection  = document.getElementById('reply-form-section');
-  const loginPrompt  = document.getElementById('login-prompt');
+  const formSection = document.getElementById('reply-form-section');
+  const loginPrompt = document.getElementById('login-prompt');
 
   if (!session) { loginPrompt.style.display = ''; return; }
 

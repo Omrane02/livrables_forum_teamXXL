@@ -28,7 +28,6 @@ let allTags       = [];
   }
 })();
 
-// ─── LOAD TAGS ────────────────────────────────────────────────────────────────
 async function loadTags() {
   try {
     const data = await Topics.getTags();
@@ -38,7 +37,6 @@ async function loadTags() {
   }
 }
 
-// ─── HEADER ───────────────────────────────────────────────────────────────────
 function renderHeaderUser() {
   const area   = document.getElementById('header-user-area');
   const newBtn = document.getElementById('new-topic-btn');
@@ -70,7 +68,6 @@ function renderHeaderUser() {
 
 function doLogout() { Auth.logout(); }
 
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 function bindSidebar() {
   document.querySelectorAll('[data-category]').forEach(el => {
     el.addEventListener('click', e => {
@@ -110,7 +107,6 @@ function updateContentTitle() {
   t.textContent = 'Tous les topics';
 }
 
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
 function bindSearch() {
   const input = document.getElementById('searchInput');
   let timeout;
@@ -125,7 +121,6 @@ function bindSearch() {
   });
 }
 
-// ─── SORT & PER PAGE ──────────────────────────────────────────────────────────
 function bindSortPerPage() {
   document.getElementById('sort-select').addEventListener('change', async e => {
     sortMode = e.target.value;
@@ -139,7 +134,6 @@ function bindSortPerPage() {
   });
 }
 
-// ─── TAG FILTER BAR ───────────────────────────────────────────────────────────
 function renderTagFilterBar() {
   const bar = document.getElementById('tag-filter-bar');
   bar.innerHTML = allTags.map(tag =>
@@ -155,7 +149,6 @@ async function setTagFilter(tag) {
   await renderTopics();
 }
 
-// ─── RENDER TOPICS ────────────────────────────────────────────────────────────
 async function renderTopics() {
   const container = document.getElementById('topics-list');
   container.innerHTML = `<div class="empty-state"><div class="emoji">⏳</div><p>Chargement...</p></div>`;
@@ -211,13 +204,12 @@ function renderTopicCard(t) {
       ${tags.map(tag => `<span class="tag" onclick="event.stopPropagation();setTagFilter('${escHtml(tag)}')">${escHtml(tag)}</span>`).join('')}
     </div>
     <div class="topic-card-footer">
-      <span style="font-size:0.78rem;color:var(--text-muted)">Score: ${t.popularity_score || 0}</span>
+      <span style="font-size:0.78rem;color:var(--text-muted)">Score: ${t.score || 0}</span>
       <span style="font-size:0.78rem;color:var(--text-muted)">${formatDate(new Date(t.created_at).getTime())}</span>
     </div>
   </div>`;
 }
 
-// ─── POPULAR ──────────────────────────────────────────────────────────────────
 async function renderPopular() {
   try {
     const data   = await Topics.getAll({ page: 1, limit: 5, sort: 'popularity' });
@@ -225,14 +217,13 @@ async function renderPopular() {
     document.getElementById('popular-topics').innerHTML = topics.map(t => `
       <div class="popular-topic" onclick="goTopic('${t.id}')">
         <span class="popular-topic-title">${escHtml(t.title)}</span>
-        <span class="popular-topic-score">🔥 ${t.popularity_score || 0}</span>
+        <span class="popular-topic-score">🔥 ${t.score || 0}</span>
       </div>`).join('');
   } catch {
     document.getElementById('popular-topics').innerHTML = '';
   }
 }
 
-// ─── PAGINATION ───────────────────────────────────────────────────────────────
 function renderPagination(totalPages) {
   const p = document.getElementById('pagination');
   if (totalPages <= 1) { p.innerHTML = ''; return; }
@@ -246,10 +237,8 @@ function renderPagination(totalPages) {
 
 async function goPage(n) { currentPage = n; await renderTopics(); window.scrollTo(0, 0); }
 
-// ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function goTopic(id) { window.location.href = `topic.html?id=${id}`; }
 
-// ─── NEW TOPIC MODAL ──────────────────────────────────────────────────────────
 function openNewTopicModal() {
   if (!session) { window.location.href = 'connexion.html'; return; }
   openModal('new-topic-modal');
@@ -262,7 +251,6 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
 });
 
-// ─── TAGS INPUT ───────────────────────────────────────────────────────────────
 function buildTagSuggestions() {
   const sugg = document.getElementById('tag-suggestions');
   sugg.innerHTML = allTags.map(t =>
@@ -308,10 +296,10 @@ function renderTagPills() {
 }
 
 async function submitNewTopic() {
-  const title = document.getElementById('nt-title').value.trim();
-  const body  = document.getElementById('nt-body').value.trim();
+  const title  = document.getElementById('nt-title').value.trim();
+  const body   = document.getElementById('nt-body').value.trim();
   const status = document.getElementById('nt-status').value;
-  const err   = document.getElementById('nt-error');
+  const err    = document.getElementById('nt-error');
   err.textContent = '';
 
   if (!title) { err.textContent = 'Le titre est obligatoire.'; return; }
@@ -336,7 +324,6 @@ async function submitNewTopic() {
   }
 }
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

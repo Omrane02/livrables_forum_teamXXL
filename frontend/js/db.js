@@ -105,15 +105,26 @@ const Messages = {
 
 // ─── VOTES ────────────────────────────────────────────────────────────────────
 const Votes = {
-  async vote(messageId, vote_type) {
-    return apiFetch(`/votes/${messageId}`, {
+  async voteMessage(messageId, vote_type) {
+    return apiFetch(`/votes/message/${messageId}`, {
       method: 'POST',
       body: JSON.stringify({ vote_type }),
     });
   },
 
-  async getVotes(messageId) {
-    return apiFetch(`/votes/${messageId}`);
+  async getMessageVotes(messageId) {
+    return apiFetch(`/votes/message/${messageId}`);
+  },
+
+  async voteTopic(topicId, vote_type) {
+    return apiFetch(`/votes/topic/${topicId}`, {
+      method: 'POST',
+      body: JSON.stringify({ vote_type }),
+    });
+  },
+
+  async getTopicVotes(topicId) {
+    return apiFetch(`/votes/topic/${topicId}`);
   },
 };
 
